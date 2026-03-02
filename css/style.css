@@ -1,0 +1,425 @@
+/* ============================================
+   REPAC - Riverside Engineering Parent Action Council
+   Riverside High School Pirates Theme
+   ============================================ */
+
+/* ---------- Variables ---------- */
+:root {
+  --pirate-black: #1a1a2e;
+  --pirate-gold: #d4a017;
+  --pirate-gold-light: #f0d060;
+  --pirate-red: #8b0000;
+  --pirate-red-light: #b22222;
+  --white: #ffffff;
+  --gray-50: #f8f9fa;
+  --gray-100: #e9ecef;
+  --gray-200: #dee2e6;
+  --gray-300: #ced4da;
+  --gray-600: #6c757d;
+  --gray-800: #343a40;
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --max-width: 1100px;
+  --nav-height: 60px;
+}
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-main);
+  color: var(--gray-800);
+  line-height: 1.6;
+  background: var(--white);
+}
+
+a { color: var(--pirate-red); text-decoration: none; }
+a:hover { color: var(--pirate-red-light); text-decoration: underline; }
+
+img { max-width: 100%; height: auto; }
+
+h1, h2, h3, h4 { color: var(--pirate-black); line-height: 1.3; }
+h1 { font-size: 2rem; margin-bottom: 0.75rem; }
+h2 { font-size: 1.5rem; margin-bottom: 0.6rem; }
+h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+/* ---------- Layout ---------- */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.page-content {
+  padding: 2rem 0 3rem;
+}
+
+/* ---------- Header / Nav ---------- */
+.site-header {
+  background: var(--pirate-black);
+  color: var(--white);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--nav-height);
+}
+
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--pirate-gold);
+  font-weight: 700;
+  font-size: 1.15rem;
+  text-decoration: none;
+}
+
+.site-brand:hover { color: var(--pirate-gold-light); text-decoration: none; }
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.site-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 0.15rem;
+  flex-wrap: wrap;
+}
+
+.site-nav a {
+  color: var(--gray-200);
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.site-nav a:hover,
+.site-nav a.active {
+  background: var(--pirate-gold);
+  color: var(--pirate-black);
+  text-decoration: none;
+}
+
+/* Dropdown */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown > a::after {
+  content: ' \25BE';
+  font-size: 0.7em;
+}
+
+.nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--pirate-black);
+  border: 1px solid var(--gray-600);
+  border-radius: 4px;
+  min-width: 200px;
+  padding: 0.25rem 0;
+  z-index: 200;
+}
+
+.nav-dropdown-menu a {
+  display: block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown.open .nav-dropdown-menu {
+  display: block;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  background: linear-gradient(135deg, var(--pirate-black) 0%, #16213e 100%);
+  color: var(--white);
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.hero h1 {
+  color: var(--pirate-gold);
+  font-size: 2.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  color: var(--gray-200);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.hero .subtitle {
+  font-size: 1rem;
+  color: var(--pirate-gold-light);
+  margin-bottom: 1rem;
+}
+
+/* ---------- Cards & Quick Links ---------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.card h3 {
+  color: var(--pirate-red);
+  margin-bottom: 0.4rem;
+}
+
+.card a {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* ---------- Info Box ---------- */
+.info-box {
+  background: var(--gray-50);
+  border-left: 4px solid var(--pirate-gold);
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  border-radius: 0 6px 6px 0;
+}
+
+.info-box.highlight {
+  border-left-color: var(--pirate-red);
+  background: #fff5f5;
+}
+
+/* ---------- Section ---------- */
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  border-bottom: 2px solid var(--pirate-gold);
+  padding-bottom: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+/* ---------- Tables ---------- */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+th, td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+th {
+  background: var(--pirate-black);
+  color: var(--pirate-gold);
+  font-weight: 600;
+}
+
+tr:hover { background: var(--gray-50); }
+
+/* ---------- FAQ ---------- */
+.faq-item {
+  border-bottom: 1px solid var(--gray-200);
+  padding: 1rem 0;
+}
+
+.faq-question {
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--pirate-black);
+}
+
+.faq-question::after {
+  content: '+';
+  font-size: 1.3rem;
+  color: var(--pirate-gold);
+  transition: transform 0.2s;
+}
+
+.faq-item.open .faq-question::after {
+  content: '\2212';
+}
+
+.faq-answer {
+  display: none;
+  padding-top: 0.5rem;
+  color: var(--gray-600);
+}
+
+.faq-item.open .faq-answer {
+  display: block;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.1s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn:hover { transform: translateY(-1px); text-decoration: none; }
+
+.btn-primary {
+  background: var(--pirate-gold);
+  color: var(--pirate-black);
+}
+
+.btn-primary:hover {
+  background: var(--pirate-gold-light);
+  color: var(--pirate-black);
+}
+
+.btn-secondary {
+  background: var(--pirate-red);
+  color: var(--white);
+}
+
+.btn-secondary:hover {
+  background: var(--pirate-red-light);
+  color: var(--white);
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  background: var(--pirate-black);
+  color: var(--gray-300);
+  padding: 2rem 0;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.footer-col h4 {
+  color: var(--pirate-gold);
+  margin-bottom: 0.5rem;
+}
+
+.footer-col ul { list-style: none; }
+
+.footer-col a {
+  color: var(--gray-300);
+  font-size: 0.85rem;
+}
+
+.footer-col a:hover { color: var(--pirate-gold-light); }
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-600);
+  color: var(--gray-600);
+  font-size: 0.8rem;
+}
+
+/* ---------- Placeholder Notice ---------- */
+.placeholder {
+  background: #fff8e1;
+  border: 1px dashed var(--pirate-gold);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  color: var(--gray-600);
+  font-style: italic;
+  margin: 0.75rem 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .nav-toggle { display: block; }
+
+  .site-nav {
+    display: none;
+    position: absolute;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    background: var(--pirate-black);
+    border-top: 1px solid var(--gray-600);
+    padding: 0.5rem 0;
+  }
+
+  .site-nav.open { display: block; }
+
+  .site-nav ul {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .site-nav a {
+    display: block;
+    padding: 0.6rem 1rem;
+    border-radius: 0;
+    font-size: 0.95rem;
+  }
+
+  .nav-dropdown-menu {
+    position: static;
+    border: none;
+    padding-left: 1rem;
+  }
+
+  .hero h1 { font-size: 1.8rem; }
+  .hero { padding: 2rem 0; }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
