@@ -430,6 +430,36 @@ tr:hover { background: var(--gray-50); }
   font-size: 0.8rem;
 }
 
+/* ---------- Media Block (text + image side-by-side) ---------- */
+.media-block {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.media-block .media-text {
+  flex: 1 1 0;
+  min-width: 200px;
+}
+
+.media-block .media-img-wrap {
+  flex: 1 1 0;
+  min-width: 200px;
+  display: flex;
+  justify-content: center;
+}
+
+.media-block .media-img {
+  max-width: 220px;
+  width: 100%;
+  height: fit-content;
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
 /* ---------- Placeholder Notice ---------- */
 .placeholder {
   background: #fff8e1;
