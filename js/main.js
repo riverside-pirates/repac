@@ -38,4 +38,25 @@
       link.classList.add('active');
     }
   });
+
+  // Calendar loading animation
+  var calendarContainer = document.querySelector('.calendar-container');
+  if (calendarContainer) {
+    var iframes = calendarContainer.querySelectorAll('.calendar-view');
+    var loadedCount = 0;
+    
+    iframes.forEach(function(iframe) {
+      iframe.addEventListener('load', function() {
+        loadedCount++;
+        if (loadedCount === iframes.length) {
+          calendarContainer.classList.add('loaded');
+        }
+      });
+    });
+    
+    // Fallback: hide loading after 10 seconds in case iframes fail to load
+    setTimeout(function() {
+      calendarContainer.classList.add('loaded');
+    }, 10000);
+  }
 })();
