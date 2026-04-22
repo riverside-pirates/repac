@@ -19,7 +19,6 @@ freshman-info.html          Info for incoming freshmen
 engineering-faq.html        Engineering program FAQ
 repac-faq.html              REPAC organization FAQ
 student-activities.html     TSA, clubs, community service
-meetings.html               Meeting schedule & minutes
 events.html                 Events calendar
 fundraising.html            Spirit wear, fundraising
 css/style.css               Shared stylesheet
