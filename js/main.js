@@ -3,6 +3,11 @@
 (function () {
   'use strict';
 
+  // ========== REMOVE WHEN SITE ENTERS PRODUCTION ==========
+  // Development/Draft Banner - Delete this entire section when launching
+  document.body.insertAdjacentHTML('afterbegin', '<div style="background-color:#d32f2f;border-bottom:3px solid #b71c1c;padding:8px 16px;text-align:center;font-weight:500;font-size:13px;color:#fff;">UNOFFICIAL DRAFT — This site is a work in progress and has not been reviewed for accuracy. Visit the official site at <a href="https://www.repac-riverside.org" style="color:#ffeb3b;text-decoration:underline;font-weight:600;">repac-riverside.org</a>.</div>');
+  // ========================================================
+
   // Mobile nav toggle
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.querySelector('.site-nav');
