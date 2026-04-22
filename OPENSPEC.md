@@ -36,7 +36,6 @@ repac-riverside.org/
 |-- engineering-faq.html        [Engineering Program FAQ]
 |   |-- repac-faq.html              [REPAC Organization FAQ]
 |-- student-activities.html     [Student Activities]
-|-- meetings.html               [Meetings]
 |-- events.html                 [Events]
 |-- fundraising.html            [Fundraising]
 |
@@ -52,7 +51,6 @@ repac-riverside.org/
 | Program | `engineering-program.html` | Overview, Courses, Freshman Info |
 | FAQ | `engineering-faq.html` | Engineering FAQ, REPAC FAQ |
 | Activities | `student-activities.html` | -- |
-| Meetings | `meetings.html` | -- |
 | Events | `events.html` | -- |
 | Fundraising | `fundraising.html` | -- |
 
@@ -183,15 +181,7 @@ repac-riverside.org/
 | Social Events | List of past event types, link to events page | Complete |
 | Clubs & Organizations | Robotics, Science Olympiad, etc. | **PLACEHOLDER** |
 
-### 4.9 Meetings (`meetings.html`)
-| Section | Content | Status |
-|---|---|---|
-| Schedule | 2nd Thursday, 6 PM, RHS Media Center | Complete |
-| Upcoming Meetings | Table with March, April, May 2026 dates | Complete |
-| Meeting Minutes | Archive of past minutes | **PLACEHOLDER** |
-| Virtual Attendance | Remote options, communication channels | **PLACEHOLDER** |
-
-### 4.10 Events (`events.html`)
+### 4.9 Events (`events.html`)
 | Section | Content | Status |
 |---|---|---|
 | Upcoming Events | Cards: monthly meeting, TSA regional, TSA state | Partial (TSA dates TBD) |
@@ -223,13 +213,11 @@ The following items require input from REPAC leadership before the site is conte
 | 6 | `repac-faq.html` | How to contact? | Email address, social media handles |
 | 7 | `student-activities.html` | Community Service | Specific projects, volunteer hour requirements |
 | 8 | `student-activities.html` | Clubs & Organizations | Current club list and descriptions |
-| 9 | `meetings.html` | Meeting Minutes | PDF/HTML links to past meeting minutes |
-| 10 | `meetings.html` | Virtual Attendance | Zoom/Teams links or communication channel info |
-| 11 | `events.html` | Upcoming Events | Confirmed TSA competition dates |
-| 12 | `events.html` | Volunteer Opportunities | Sign-up links, contact for volunteer coordinator |
-| 13 | `fundraising.html` | Spirit Wear | Product catalog, ordering link, pricing |
-| 14 | `fundraising.html` | Make a Donation | Online payment link, mailing address, EIN/tax ID |
-| 15 | `fundraising.html` | Corporate Sponsorship | Sponsorship tiers, partnership contact |
+| 9 | `events.html` | Upcoming Events | Confirmed TSA competition dates |
+| 10 | `events.html` | Volunteer Opportunities | Sign-up links, contact for volunteer coordinator |
+| 11 | `fundraising.html` | Spirit Wear | Product catalog, ordering link, pricing |
+| 12 | `fundraising.html` | Make a Donation | Online payment link, mailing address, EIN/tax ID |
+| 13 | `fundraising.html` | Corporate Sponsorship | Sponsorship tiers, partnership contact |
 
 ---
 
@@ -371,7 +359,6 @@ All 15 placeholder items cataloged in Section 5 above.
 | `engineering-faq.html` | 5 KB | 9 engineering program Q&As |
 | `repac-faq.html` | 5 KB | 8 REPAC organization Q&As (2 placeholder) |
 | `student-activities.html` | 4 KB | TSA, community service, social events, clubs |
-| `meetings.html` | 4 KB | Schedule, upcoming dates, minutes archive (placeholder) |
 | `events.html` | 5 KB | Upcoming events, annual events table, volunteering |
 | `fundraising.html` | 5 KB | Spirit wear, fund usage, donations, sponsorship |
 | `css/style.css` | 8 KB | Complete design system and responsive styles |
