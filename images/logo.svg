@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#400080"></rect>
+  
+  <g fill="#F0E000">
+    <path d="M32 6 L35 6 L36 12 C38 12.4 40 13 41.7 13.9 L46 10 L48.5 12.5 L44.6 16.8 C45.6 18.5 46.3 20.3 46.7 22.3 L52.5 23.5 L52.5 27 L46.7 28 C46.3 30 45.6 31.8 44.6 33.5 L48.5 37.8 L46 40.3 L41.7 36.4 C40 37.3 38 37.9 36 38.3 L35 44.3 L29 44.3 L28 38.3 C26 37.9 24 37.3 22.3 36.4 L18 40.3 L15.5 37.8 L19.4 33.5 C18.4 31.8 17.7 30 17.3 28 L11.5 27 L11.5 23.5 L17.3 22.3 C17.7 20.3 18.4 18.5 19.4 16.8 L15.5 12.5 L18 10 L22.3 13.9 C24 13 26 12.4 28 12 L29 6 Z" transform="translate(0 7)"></path>
+  </g>
+  
+  <circle cx="32" cy="32" r="11" fill="#400080"></circle>
+  
+  <g fill="#F0E000">
+    <g transform="translate(32 32) rotate(45)">
+      <rect x="-9" y="-1.5" width="18" height="3" rx="1.5"></rect>
+      <circle cx="-9" cy="-2" r="2"></circle><circle cx="-9" cy="2" r="2"></circle>
+      <circle cx="9" cy="-2" r="2"></circle><circle cx="9" cy="2" r="2"></circle>
+    </g>
+    <g transform="translate(32 32) rotate(-45)">
+      <rect x="-9" y="-1.5" width="18" height="3" rx="1.5"></rect>
+      <circle cx="-9" cy="-2" r="2"></circle><circle cx="-9" cy="2" r="2"></circle>
+      <circle cx="9" cy="-2" r="2"></circle><circle cx="9" cy="2" r="2"></circle>
+    </g>
+  </g>
+</svg>
