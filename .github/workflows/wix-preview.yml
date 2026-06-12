@@ -1,0 +1,71 @@
+name: Wix Preview
+
+# Builds the wix-host Astro wrapper and publishes an ephemeral Wix preview for
+# each pull request, posting the preview URL as a PR comment.
+#
+# This workflow is INERT until Stage 2 is done (see wix-host/README.md): the Wix
+# steps are skipped unless the repository secret WIX_API_KEY is set. Until then,
+# PR runs only build the wrapper and stay green.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    # secrets.* is unreliable inside step-level `if:`, so surface it as an env var.
+    env:
+      HAS_WIX_KEY: ${{ secrets.WIX_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: wix-host
+        run: npm ci
+
+      - name: Sync static site into public/
+        working-directory: wix-host
+        run: npm run sync-static
+
+      # --- Stage 1: always runs, even without a Wix account ---
+      - name: Build wrapper (sanity check)
+        working-directory: wix-host
+        run: npm run build
+
+      # --- Stage 2: only runs once WIX_API_KEY is configured ---
+      # NOTE: the exact non-interactive auth invocation + the env-var name the
+      # Wix CLI expects must be confirmed against the scaffolder's generated
+      # workflow at link time (Wix renders that snippet client-side). The line
+      # below is the documented shape; adjust when wiring up the real key.
+      - name: Publish Wix preview
+        if: ${{ env.HAS_WIX_KEY == 'true' }}
+        id: wix_preview
+        working-directory: wix-host
+        env:
+          WIX_API_KEY: ${{ secrets.WIX_API_KEY }}
+        run: |
+          # TODO(stage-2): confirm against generated workflow.
+          #   - wix CLI is provided by @wix/cli after `headless link`
+          #   - capture the preview URL into $GITHUB_OUTPUT as preview_url
+          npx wix preview | tee preview.log
+          url="$(grep -oE 'https://[^ ]+' preview.log | tail -n1)"
+          echo "preview_url=${url}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview URL on PR
+        if: ${{ env.HAS_WIX_KEY == 'true' && github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: wix-preview
+          message: |
+            🔍 **Wix preview** for this PR:
+
+            ${{ steps.wix_preview.outputs.preview_url }}

@@ -1,0 +1,15 @@
+{
+  "name": "repac-wix-host",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Wix-Managed Headless wrapper that serves the REPAC static site.",
+  "scripts": {
+    "sync-static": "node scripts/sync-static.mjs",
+    "build": "npm run sync-static && astro build",
+    "preview:local": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.0.0"
+  }
+}
