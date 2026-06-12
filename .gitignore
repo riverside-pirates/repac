@@ -1,0 +1,12 @@
+# Claude Code worktrees + local session handoff
+.claude/worktrees/
+HANDOFF.md
+
+# OS cruft
+.DS_Store
+
+# Wix headless wrapper (generated / installed)
+wix-host/public/
+wix-host/dist/
+wix-host/node_modules/
+wix-host/.astro/
