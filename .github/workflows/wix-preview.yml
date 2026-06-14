@@ -52,14 +52,23 @@ jobs:
         env:
           WIX_API_KEY: ${{ secrets.WIX_API_KEY }}
 
+      # Pull the project's WIX_CLIENT_* env vars (the build needs them; a fresh
+      # CI checkout has no .env.local) and build — `wix preview` does NOT build,
+      # it requires an existing dist/. `npm run build` = sync-static + wix build.
+      - name: Build for Wix
+        if: ${{ env.HAS_WIX_KEY == 'true' }}
+        working-directory: wix-host
+        run: |
+          npx wix env pull
+          npm run build
+
       - name: Publish Wix preview
         if: ${{ env.HAS_WIX_KEY == 'true' }}
         id: wix_preview
         working-directory: wix-host
         run: |
-          npm run sync-static
           npx wix preview | tee preview.log
-          url="$(grep -oE 'https://[^[:space:]]+' preview.log | tail -n1)"
+          url="$(grep -oE 'https://[^[:space:]]+wix-site-host[^[:space:]]*' preview.log | tail -n1)"
           echo "preview_url=${url}" >> "$GITHUB_OUTPUT"
 
       - name: Comment preview URL on PR

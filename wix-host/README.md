@@ -25,16 +25,19 @@ secret). CI does **not** use them; it authenticates with an API key instead (bel
 ### Publish a preview manually
 
 ```bash
-npm run sync-static
-npx wix preview        # uploads + returns an ephemeral preview URL
+npm run build          # sync-static + wix build -> dist/ (wix preview does NOT build)
+npx wix preview        # uploads dist/ + returns an ephemeral preview URL
 ```
+
+If `.env.local` is missing, run `npx wix env pull` first to fetch the project's `WIX_CLIENT_*` vars.
 
 ## CI — preview on every PR
 
 `.github/workflows/wix-preview.yml` publishes a Wix preview for each PR and posts the URL as a PR
-comment. It authenticates non-interactively with `wix login --api-key "$WIX_API_KEY"` (the documented
-CI auth path). Every Wix step is gated on the `WIX_API_KEY` repo secret, so PRs without it (e.g. from
-forks) only verify the static sync and stay green.
+comment. The keyed path: `wix login --api-key "$WIX_API_KEY"` (the documented CI auth path) →
+`wix env pull` (fetches the build's `WIX_CLIENT_*` vars — a CI checkout has no `.env.local`) →
+`npm run build` → `wix preview`. Every Wix step is gated on the `WIX_API_KEY` repo secret, so PRs
+without it (e.g. from forks) only verify the static sync and stay green.
 
 **To activate it:** create a Wix **API key** (Wix dashboard → API Keys Manager) scoped for the
 headless project, then add it to the GitHub repo as a secret named exactly **`WIX_API_KEY`**
