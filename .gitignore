@@ -10,3 +10,10 @@ wix-host/public/
 wix-host/dist/
 wix-host/node_modules/
 wix-host/.astro/
+wix-host/.wix/
+
+# Wix local secrets + crash logs (never commit — contain client secret / keys).
+# CI authenticates via the WIX_API_KEY repo secret instead, not .env.local.
+wix-host/.env.local
+wix-host/.env*.local
+wix-error.log

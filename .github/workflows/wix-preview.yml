@@ -1,11 +1,12 @@
 name: Wix Preview
 
-# Builds the wix-host Astro wrapper and publishes an ephemeral Wix preview for
-# each pull request, posting the preview URL as a PR comment.
+# Publishes an ephemeral Wix preview of the wix-host wrapper for each pull
+# request and posts the preview URL as a PR comment.
 #
-# This workflow is INERT until Stage 2 is done (see wix-host/README.md): the Wix
-# steps are skipped unless the repository secret WIX_API_KEY is set. Until then,
-# PR runs only build the wrapper and stay green.
+# Gating: every Wix/auth step is guarded by HAS_WIX_KEY (the WIX_API_KEY repo
+# secret, surfaced as an env var because secrets.* is unreliable in `if:`).
+# Without the secret (e.g. fork PRs), the job only verifies the static sync and
+# stays green — it never runs a Wix build, which needs auth.
 
 on:
   pull_request:
@@ -18,7 +19,6 @@ permissions:
 jobs:
   preview:
     runs-on: ubuntu-latest
-    # secrets.* is unreliable inside step-level `if:`, so surface it as an env var.
     env:
       HAS_WIX_KEY: ${{ secrets.WIX_API_KEY != '' }}
     steps:
@@ -36,28 +36,30 @@ jobs:
         working-directory: wix-host
         run: npm run sync-static
 
-      # --- Stage 1: always runs, even without a Wix account ---
-      - name: Build wrapper (sanity check)
+      # Keyless sanity check (always runs): confirms the static site was synced
+      # into public/. Cheap and auth-free, so secret-less PRs stay green. The
+      # real Astro/Wix build happens inside `wix preview` on the keyed path.
+      - name: Verify sync output
         working-directory: wix-host
-        run: npm run build
+        run: test -f public/index.html && test -f public/css/style.css
 
-      # --- Stage 2: only runs once WIX_API_KEY is configured ---
-      # NOTE: the exact non-interactive auth invocation + the env-var name the
-      # Wix CLI expects must be confirmed against the scaffolder's generated
-      # workflow at link time (Wix renders that snippet client-side). The line
-      # below is the documented shape; adjust when wiring up the real key.
+      # Authenticate the Wix CLI non-interactively (see `wix login --help`:
+      # "--api-key <token>  Authenticate using an API key for ... CI environments").
+      - name: Authenticate Wix CLI
+        if: ${{ env.HAS_WIX_KEY == 'true' }}
+        working-directory: wix-host
+        run: npx wix login --api-key "$WIX_API_KEY"
+        env:
+          WIX_API_KEY: ${{ secrets.WIX_API_KEY }}
+
       - name: Publish Wix preview
         if: ${{ env.HAS_WIX_KEY == 'true' }}
         id: wix_preview
         working-directory: wix-host
-        env:
-          WIX_API_KEY: ${{ secrets.WIX_API_KEY }}
         run: |
-          # TODO(stage-2): confirm against generated workflow.
-          #   - wix CLI is provided by @wix/cli after `headless link`
-          #   - capture the preview URL into $GITHUB_OUTPUT as preview_url
+          npm run sync-static
           npx wix preview | tee preview.log
-          url="$(grep -oE 'https://[^ ]+' preview.log | tail -n1)"
+          url="$(grep -oE 'https://[^[:space:]]+' preview.log | tail -n1)"
           echo "preview_url=${url}" >> "$GITHUB_OUTPUT"
 
       - name: Comment preview URL on PR

@@ -5,45 +5,43 @@ This is a thin [Astro](https://astro.build) project that wraps the plain static 
 Headless**, which requires an Astro-based frontend.
 
 The static files are **not** edited here. `scripts/sync-static.mjs` copies them into `public/`,
-where Astro serves them verbatim at the site root. `public/` is generated and gitignored — never
-commit it.
+where Wix serves them at the site root (confirmed: `/` serves `public/index.html`). `public/` is
+generated and gitignored — never commit it. The project is linked to a Wix-Managed Headless project
+via `wix.config.json` (committed; holds the `appId`/`siteId`, which are identifiers, not secrets).
 
-## Local development (no Wix account needed)
+## Local development
 
 ```bash
 cd wix-host
 npm install
-npm run build          # sync-static + astro build -> dist/
-npm run preview:local  # serve dist/ and click through the site
+npm run build          # sync-static + wix build -> dist/ (server output)
 ```
 
 `npm run sync-static` alone re-copies the root static files into `public/` after you edit them.
 
-> Local preview is plain static serving. It verifies the sync and that relative links resolve.
-> It does **not** reproduce Wix's `output: 'server'` hosting model — see the homepage-routing note
-> below.
+Local secrets from `wix create ... link` live in `.env.local` (gitignored — contains the Wix client
+secret). CI does **not** use them; it authenticates with an API key instead (below).
 
-## Stage 2 — connect to Wix (manual prerequisites)
+### Publish a preview manually
 
-These steps require a Wix account and are **not** done yet. The CI workflow
-(`.github/workflows/wix-preview.yml`) stays inert until they are.
+```bash
+npm run sync-static
+npx wix preview        # uploads + returns an ephemeral preview URL
+```
 
-1. Create a **Wix-Managed Headless** project in your Wix account.
-2. From this `wix-host/` directory, link the project:
-   ```bash
-   npm create @wix/new -- headless link
-   ```
-   This provisions Wix infra and updates the project: it adds `@wix/astro`, `@astrojs/react`, and
-   the `@wix/cloud-provider-fetch-adapter`, and switches `astro.config.mjs` to `output: 'server'`.
-   **Reconcile** the generated `package.json` with the scripts here — keep `sync-static`, and make
-   sure `build` still runs `sync-static` before the Wix build.
-3. Create a Wix **API key** (Wix API Keys Manager) and add it to the GitHub repo as the secret
-   `WIX_API_KEY`. The preview workflow activates automatically once the secret exists.
+## CI — preview on every PR
 
-### Open risk to verify after linking: homepage routing under `output: 'server'`
+`.github/workflows/wix-preview.yml` publishes a Wix preview for each PR and posts the URL as a PR
+comment. It authenticates non-interactively with `wix login --api-key "$WIX_API_KEY"` (the documented
+CI auth path). Every Wix step is gated on the `WIX_API_KEY` repo secret, so PRs without it (e.g. from
+forks) only verify the static sync and stay green.
 
-Once linked, the deployed app is server-rendered — `/` is handled by the Wix server function, not a
-static file server. It is **unverified** whether an empty `src/pages/` causes the deployed site to
-serve `public/index.html` at `/`, or 404 the homepage. After the first `wix preview`, **load the
-preview's `/` explicitly**. If the homepage 404s, add a real `src/pages/index.astro` (and possibly a
-catch-all `src/pages/[...slug].astro`) that emits the static HTML, instead of relying on `public/`.
+**To activate it:** create a Wix **API key** (Wix dashboard → API Keys Manager) scoped for the
+headless project, then add it to the GitHub repo as a secret named exactly **`WIX_API_KEY`**
+(Settings → Secrets and variables → Actions). No code change needed — the next PR run goes live.
+
+## Notes
+
+- **Homepage routing (resolved):** under `output: 'server'`, Wix serves `public/index.html` at `/`
+  with an empty `src/pages/`. Verified on a live preview — `/`, all sub-pages, and assets return 200.
+  `src/pages/404.astro` provides the not-found page and keeps the build non-empty.
