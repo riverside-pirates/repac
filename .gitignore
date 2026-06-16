@@ -17,3 +17,4 @@ wix-host/.wix/
 wix-host/.env.local
 wix-host/.env*.local
 wix-error.log
+wix-host/preview.log
