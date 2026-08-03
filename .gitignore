@@ -1,0 +1,8 @@
+# Claude Code managed worktrees (per-session, never committed)
+.claude/worktrees/
+
+# Local cross-session handoff notes (not for commit)
+HANDOFF.md
+
+# macOS
+.DS_Store
