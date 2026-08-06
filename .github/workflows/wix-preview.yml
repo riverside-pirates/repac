@@ -1,0 +1,82 @@
+name: Wix Preview
+
+# Publishes an ephemeral Wix preview of the wix-host wrapper for each pull
+# request and posts the preview URL as a PR comment.
+#
+# Gating: every Wix/auth step is guarded by HAS_WIX_KEY (the WIX_API_KEY repo
+# secret, surfaced as an env var because secrets.* is unreliable in `if:`).
+# Without the secret (e.g. fork PRs), the job only verifies the static sync and
+# stays green — it never runs a Wix build, which needs auth.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      HAS_WIX_KEY: ${{ secrets.WIX_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: wix-host
+        run: npm ci
+
+      - name: Sync static site into public/
+        working-directory: wix-host
+        run: npm run sync-static
+
+      # Keyless sanity check (always runs): confirms the static site was synced
+      # into public/. Cheap and auth-free, so secret-less PRs stay green. The
+      # real Astro/Wix build happens inside `wix preview` on the keyed path.
+      - name: Verify sync output
+        working-directory: wix-host
+        run: test -f public/index.html && test -f public/css/style.css
+
+      # Authenticate the Wix CLI non-interactively (see `wix login --help`:
+      # "--api-key <token>  Authenticate using an API key for ... CI environments").
+      - name: Authenticate Wix CLI
+        if: ${{ env.HAS_WIX_KEY == 'true' }}
+        working-directory: wix-host
+        run: npx wix login --api-key "$WIX_API_KEY"
+        env:
+          WIX_API_KEY: ${{ secrets.WIX_API_KEY }}
+
+      # Pull the project's WIX_CLIENT_* env vars (the build needs them; a fresh
+      # CI checkout has no .env.local) and build — `wix preview` does NOT build,
+      # it requires an existing dist/. `npm run build` = sync-static + wix build.
+      - name: Build for Wix
+        if: ${{ env.HAS_WIX_KEY == 'true' }}
+        working-directory: wix-host
+        run: |
+          npx wix env pull
+          npm run build
+
+      - name: Publish Wix preview
+        if: ${{ env.HAS_WIX_KEY == 'true' }}
+        id: wix_preview
+        working-directory: wix-host
+        run: |
+          npx wix preview | tee preview.log
+          url="$(grep -oE 'https://[^[:space:]]+wix-site-host[^[:space:]]*' preview.log | tail -n1)"
+          echo "preview_url=${url}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview URL on PR
+        if: ${{ env.HAS_WIX_KEY == 'true' && github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: wix-preview
+          message: |
+            🔍 **Wix preview** for this PR:
+
+            ${{ steps.wix_preview.outputs.preview_url }}
