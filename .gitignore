@@ -13,8 +13,8 @@ wix-host/.astro/
 wix-host/.wix/
 
 # Wix local secrets + crash logs (never commit — contain client secret / keys).
-# CI authenticates via the WIX_API_KEY repo secret instead, not .env.local.
+# .env.local holds the headless OAuth app identity; the local `wix login` browser
+# session (~/.wix/auth) is what authorizes preview/release.
 wix-host/.env.local
 wix-host/.env*.local
 wix-error.log
-wix-host/preview.log
