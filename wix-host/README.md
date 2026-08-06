@@ -20,28 +20,22 @@ npm run build          # sync-static + wix build -> dist/ (server output)
 `npm run sync-static` alone re-copies the root static files into `public/` after you edit them.
 
 Local secrets from `wix create ... link` live in `.env.local` (gitignored — contains the Wix client
-secret). CI does **not** use them; it authenticates with an API key instead (below).
+secret) and are read by the build.
 
-### Publish a preview manually
+### Publish a preview
+
+Preview and release are **human-run**, not automated. Wix's privileged operations require an
+account-**owner** session, which an API key can't hold (see `docs/deploy.md` §3), so there is no CI
+that publishes previews — you do it locally.
 
 ```bash
-npm run build          # sync-static + wix build -> dist/ (wix preview does NOT build)
-npx wix preview        # uploads dist/ + returns an ephemeral preview URL
+npx wix login           # one-time owner login (opens a browser; session lasts ~4h)
+npm run deploy:preview  # wix whoami (fail-fast auth check) -> build -> wix preview -> ephemeral URL
 ```
 
-If `.env.local` is missing, run `npx wix env pull` first to fetch the project's `WIX_CLIENT_*` vars.
-
-## CI — preview on every PR
-
-`.github/workflows/wix-preview.yml` publishes a Wix preview for each PR and posts the URL as a PR
-comment. The keyed path: `wix login --api-key "$WIX_API_KEY"` (the documented CI auth path) →
-`wix env pull` (fetches the build's `WIX_CLIENT_*` vars — a CI checkout has no `.env.local`) →
-`npm run build` → `wix preview`. Every Wix step is gated on the `WIX_API_KEY` repo secret, so PRs
-without it (e.g. from forks) only verify the static sync and stay green.
-
-**To activate it:** create a Wix **API key** (Wix dashboard → API Keys Manager) scoped for the
-headless project, then add it to the GitHub repo as a secret named exactly **`WIX_API_KEY`**
-(Settings → Secrets and variables → Actions). No code change needed — the next PR run goes live.
+`deploy:preview` aborts in ~4s if you're not logged in — re-run `npx wix login` and try again.
+When you're ready to publish for real, `npm run deploy:release` (same guard, ends in `wix release`;
+does **not** touch DNS).
 
 ## Notes
 

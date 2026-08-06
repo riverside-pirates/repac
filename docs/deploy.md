@@ -26,78 +26,64 @@ Project linkage lives in `wix-host/wix.config.json` (committed; identifiers, not
 
 ## 2. Current status
 
+**Deploy model: the human is the executor (Shape B).** Preview and release are run locally by an
+account owner; there is no CI that talks to Wix. Rationale in §3.
+
 | Capability | State |
 |---|---|
 | Local build (`npm run build` = sync + `wix build`) | ✅ **[VERIFIED]** works (server bundle, 16 routes) |
-| Manual preview (`wix preview` via interactive browser login) | ✅ **[VERIFIED]** deploys, serves correctly |
-| CI keyless path (sync + verify) on every PR | ✅ **[VERIFIED]** green |
-| CI auth `wix login --api-key` | ✅ **[VERIFIED]** succeeds in GitHub Actions |
-| **CI-driven `wix preview`** | ❌ **blocked** — see §3 |
-| Release pipeline (`wix release`) | **[DEFERRED]** — design in §5 |
+| Local preview (`npm run deploy:preview`, owner browser login) | ✅ **[VERIFIED]** deploys, serves correctly |
+| Fail-fast auth preflight (`wix whoami` fronting deploy scripts) | ✅ aborts in ~4s when logged out, before the build |
+| CI | **none** — static site; no Wix CI (see §3) |
+| Release (`npm run deploy:release` → `wix release`) | **[DEFERRED]** — local, human-run; design in §5 |
 | DNS cutover + rollback | **[DEFERRED]** — runbook in §6 |
 
-Open PRs: **#52** (Stage 1: wrapper + gated workflow), **#53** (Stage 2: link + keyed preview).
-Merge #52 first; #53 auto-retargets to `main`.
+## 3. Why there is no CI — the permission wall, and how we resolved it
 
-## 3. The CI preview blocker (the central finding)
+**[VERIFIED] Wix's privileged CLI operations require an account-owner session that an API key
+cannot hold.** `wix env pull` fails in CI with `403 PERMISSION_DENIED: VELO.APP_PROJECT_READ`, tested
+with a key broadened to **all sites (premium + drafts)** — still failed. So:
 
-The CI workflow (`.github/workflows/wix-preview.yml`) does, on the keyed path:
-`wix login --api-key` → `wix env pull` → `npm run build` → `wix preview`.
+- `VELO.APP_PROJECT_READ` is an **app/project-owner** permission on a *different axis* from site
+  access. **It is not grantable to an API key**, regardless of scope. Site-scoping is irrelevant.
+- Locally these commands work only because we're logged in as the **owner** via browser (the
+  `wix login` session in `~/.wix/auth`), not via an API key.
 
-**[VERIFIED] `wix env pull` fails in CI with `403 PERMISSION_DENIED: VELO.APP_PROJECT_READ`.**
-This was tested with an API key broadened to **all sites (premium + drafts)** and still failed —
-proving:
+**Resolution — the human is the executor (Shape B).** Instead of fighting the wall, the owner runs
+the privileged steps locally, where the owner session already exists. Preview/release are the two
+`npm run deploy:*` scripts (§9), each fronted by a `wix whoami` fail-fast check so a stale ~4h token
+aborts in seconds. CI does nothing Wix-related; the owner's local `wix build` is the build check.
 
-- `VELO.APP_PROJECT_READ` is an **app/project-owner** permission, on a *different axis* from site
-  access. **It is not grantable to an API key**, regardless of site scope.
-- Site-scoping is therefore irrelevant to this blocker. (Aside: the "Specific sites" picker only
-  lists *premium* sites and there's no REST API to create/scope keys, so a draft headless project
-  can only be reached via an "All sites" key anyway.)
+**Abandoned approaches** (recorded so they aren't reopened):
+- *CI `wix login --api-key` + `wix env pull`* — dies at the 403 wall above.
+- *Env-injection* (store `WIX_CLIENT_*` as GitHub vars/secrets, skip `env pull`) — even if it
+  unblocked the build, `wix preview` is itself an app-project operation and would likely 403 on the
+  same wall; never worth carrying the client secret in GitHub to find out.
+- *Keyless static-check CI* — only re-ran the file-copy the owner's local build already does; pure
+  ceremony, deleted.
 
-**Why it matters:** `wix env pull` reads project config the build needs (`WIX_CLIENT_*`,
-`WIX_CLOUD_PROVIDER`). Locally it works only because we're logged in as the **owner** via browser —
-not via API key.
+## 4. Authentication
 
-### The proposed workaround (env-injection) — **[OPEN]**
-Stop using `wix env pull` in CI. Instead store the full `.env.local` contents (which **includes the
-real `WIX_CLIENT_SECRET`**) as a single GitHub secret and write it to `wix-host/.env.local` before
-`npm run build`.
+- **Owner auth = local `wix login`** (browser). It writes an OAuth session to `~/.wix/auth`
+  (access token, `expiresIn` ~4h + a refresh token). This session is what clears the
+  `VELO.APP_PROJECT_READ` wall (§3), so it's what authorizes preview/release.
+- **`wix whoami`** confirms the session (`Logged in as <email>`, exit 0) and fronts the deploy
+  scripts as the fail-fast check; on a dead session it exits non-zero in ~4s.
+- **`.env.local`** (`WIX_CLIENT_ID` / `WIX_CLIENT_SECRET` / `WIX_CLIENT_PUBLIC_KEY` /
+  `WIX_CLIENT_INSTANCE_ID` / `WIX_CLOUD_PROVIDER`) is the headless OAuth app's identity, read by the
+  build. Gitignored; obtained once via `wix env pull` while logged in as owner, then kept locally.
+- **No CI credentials.** The `WIX_API_KEY` GitHub secret and `WIX_CLIENT_ID` repo variable that the
+  old keyed CI used were **deleted** as unused. (If a keyed approach is ever revisited, note that an
+  API key cannot clear the §3 wall — that's why it was abandoned.)
 
-**Unresolved risk — do not assume this is the fix:** env-injection only unblocks `env pull` + build.
-**`wix preview` is also an app-project operation and may 403 on the same owner-permission wall.** We
-have *never* run `wix preview` via an API key (only via browser login). So env-injection might just
-move the wall one step. One keyed CI run after wiring it would be decisive:
-- green + preview URL → CI preview is viable, done.
-- 403 at `wix preview` → **CI-driven preview via API key is not supported**; fall back to manual
-  preview (developer runs `wix preview` locally — **[VERIFIED]** that works — and shares the URL),
-  with CI staying as keyless build-sanity only.
+## 5. Release — **[DEFERRED]**, local & human-run
 
-**Decision pending from the site owner:** wire env-injection (accepting the client secret in GitHub)
-to run the decisive test, or pivot to manual preview now.
-
-## 4. Authentication & API keys
-
-- **API keys are account-level**, created only by an account **owner/co-owner** in the API Keys
-  Manager (UI only — **[VERIFIED]** no REST API to create or scope them).
-- Site-level calls only work with a key from the **site's owner account**.
-- `wix login --api-key "$WIX_API_KEY"` is the documented + **[VERIFIED]** CI auth path.
-- The two distinct credentials — **don't conflate**:
-  - `WIX_API_KEY` (GitHub secret) — account-level, authenticates the CLI in CI.
-  - `WIX_CLIENT_ID` / `WIX_CLIENT_SECRET` / `WIX_CLOUD_PROVIDER` (in `.env.local`) — the headless
-    OAuth app's identity, used by the build. Normally fetched by `wix env pull`; gitignored.
-- **Scope guidance:** the static site calls zero Wix business-data APIs, so the key needs none of the
-  business-vertical scopes (Stores/Members/Contacts/etc.). The blocking permission
-  (`VELO.APP_PROJECT_READ`) is **not** a selectable key scope (§3).
-- **Least-privilege at go-live:** when the project gets a premium plan it becomes selectable in the
-  "Specific sites" picker; re-scope the key from "All sites" to just `siteId 9830980c…` then.
-
-## 5. Release pipeline — **[DEFERRED]**
-
-Design for when preview is settled and we're ready to publish:
-- `.github/workflows/wix-release.yml` (production branch / manual): same auth+build as preview,
-  ending in `wix release` (`--version-type major|minor`, `--comment`).
-- **[VERIFIED]** `wix release` produces **versioned** releases. **There is no `wix rollback` command.**
-- Will inherit the same API-key permission question as preview (§3) — validate before relying on it.
+Release is a local command, not a workflow (same reason as preview, §3):
+- `cd wix-host && npm run deploy:release` — `wix whoami` → build → `wix release`. Run only when
+  explicitly blessed. **[VERIFIED]** `wix release` produces **versioned** releases; **there is no
+  `wix rollback` command.**
+- **Governing constraint:** do **not** `wix release` or cut over DNS until the owner explicitly says
+  so. A release publishes a new headless version; it does not itself reassign the live domain (§6).
 
 ## 6. Cutover & rollback — **[DEFERRED]**
 
@@ -135,27 +121,25 @@ existing Wix Editor site's content/data into a headless project. Consequences fo
 
 ## 8. Known issues / TODO
 
-- **[BUG, pending revert]** `@astrojs/cloudflare` was pruned from `wix-host/package.json` (commit
-  `5ddf4eb`); it must be **restored** — the build falls back to it when `WIX_CLOUD_PROVIDER` is unset
-  (the CI condition while `env pull` is blocked). The React-stack prune in the same commit is fine
-  (verified — no React components).
-- **[DECISION]** Resolve the §3 env-injection-vs-manual-preview fork.
-- **[DEFERRED]** Build `wix-release.yml`, finish cutover/rollback once the live site type (§6) is
-  confirmed and a premium plan is attached.
+- **[RESOLVED]** `@astrojs/cloudflare` restored to `wix-host/package.json` (it's the fallback adapter
+  when `WIX_CLOUD_PROVIDER` is unset). The §3 env-injection-vs-manual fork is closed: Shape B
+  (human-run preview/release, no CI) is the chosen model.
+- **[DEFERRED]** Cutover/rollback once the live site type (§6) is confirmed and a premium plan is
+  attached. Release itself is already a local command (§5) — no `wix-release.yml` to build.
 
 ## 9. Quick reference
 
 ```bash
-# Local (authenticated via browser: `wix login`)
 cd wix-host
 npm install
-npm run build            # sync-static + wix build -> dist/ (needs .env.local; `wix env pull` to fetch)
-npx wix preview          # deploys an ephemeral preview, prints the URL
+npx wix login            # one-time owner login (browser; session ~4h). `wix whoami` to check.
 
-# CI auth (non-interactive)
-npx wix login --api-key "$WIX_API_KEY"
+npm run deploy:preview   # wix whoami -> build -> wix preview  (ephemeral URL; safe)
+npm run deploy:release   # wix whoami -> build -> wix release  (DEFERRED; only when blessed)
 ```
 
+- If a deploy script aborts at `wix whoami`, re-run `npx wix login`.
+- First-time `.env.local` setup (while logged in as owner): `npx wix env pull`.
 - Preview URL pattern: `https://<id>-riverside-<acct>-<owner>.wix-site-host.com`
-- CLI: `@wix/cli` (GA since Feb 2026). Commands: `login --api-key`, `env pull`, `build`, `preview`,
-  `release`. No `rollback`.
+- CLI: `@wix/cli` (GA since Feb 2026). Commands used: `login`, `whoami`, `env pull`, `build`,
+  `preview`, `release`. No `rollback`.
