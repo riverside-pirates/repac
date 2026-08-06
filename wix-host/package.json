@@ -13,6 +13,8 @@
     "dev": "wix dev",
     "preview": "wix preview",
     "release": "wix release",
+    "deploy:preview": "wix whoami && npm run build && wix preview",
+    "deploy:release": "wix whoami && npm run build && wix release",
     "generate": "wix generate",
     "env": "wix env",
     "skills": "wix skills"
