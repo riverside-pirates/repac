@@ -114,12 +114,20 @@ existing Wix Editor site's content/data into a headless project. Consequences fo
    Cutover = reassign domain to the headless project; rollback = reassign back to the (intact) old site.
 
 **Cutover guidance:**
-- **[OPEN] Confirm what the current live REPAC site actually is** — a Wix Editor site vs. an external
-  host (the homepage references a `square.site` store). This changes rollback:
-  - If **Wix Editor site**: rollback is internal domain reassignment + an **SSL re-validation window**
-    (not an instant TTL flip — both sites are on Wix). **Keep the old Editor site published/undeleted.**
-  - If **external host**: lowering DNS TTL before cutover enables a fast repoint back — that classic
-    advice applies only here.
+- **[VERIFIED] The current live REPAC site is a classic Wix Editor site.** Probed
+  `https://www.repac-riverside.org` directly: it is served by Wix's Thunderbolt viewer and the
+  rendered model carries `"editorType":""`, `"isResponsive":false`, `"siteType":"UGC"` — the
+  classic drag-and-drop Editor, not Wix Studio (which reports a non-empty `editorType` and
+  `isResponsive:true`) and not Harmony. Response headers confirm Wix hosting (`server: Pepyaka`,
+  `x-wix-meta-site-id`). The `square.site` store on the homepage is just an outbound link, not the
+  host. Consequences, both now settled:
+  - **Rollback is an internal Wix domain reassignment**, plus an **SSL re-validation window** — not
+    an instant TTL flip, because both old and new properties sit on Wix. The pre-cutover
+    "lower your DNS TTL" advice does **not** apply and shouldn't be planned around.
+  - **Keep the old Editor site published and undeleted** well past launch. It is the rollback
+    target, and a domain maps to one Wix property at a time.
+  - **Nothing migrates.** [VERIFIED via docs] Wix cannot carry an Editor site's pages or data into a
+    headless project, which is why this repo is a rebuild rather than an import.
 - Wix-Managed Headless needs a **premium plan** to serve a custom domain.
 - Lowest-risk pattern: validate on a **subdomain** (e.g. `beta.repac-riverside.org`) before
   reassigning the apex `www.repac-riverside.org`.
@@ -140,8 +148,9 @@ existing Wix Editor site's content/data into a headless project. Consequences fo
   (the CI condition while `env pull` is blocked). The React-stack prune in the same commit is fine
   (verified — no React components).
 - **[DECISION]** Resolve the §3 env-injection-vs-manual-preview fork.
-- **[DEFERRED]** Build `wix-release.yml`, finish cutover/rollback once the live site type (§6) is
-  confirmed and a premium plan is attached.
+- **[DEFERRED]** Build `wix-release.yml` and finish cutover/rollback once a premium plan is attached.
+  The live site type is no longer a blocker here — §6 settles it (classic Wix Editor site), so the
+  cutover plan is the Wix-internal domain-reassignment path.
 
 ## 9. Quick reference
 
