@@ -87,8 +87,22 @@ Release is a local command, not a workflow (same reason as preview, §3):
 
 ## 6. Cutover & rollback — **[DEFERRED]**
 
-The deployed headless app is a **fresh rebuild**; **[VERIFIED via docs]** Wix cannot migrate an
-existing Wix Editor site's content/data into a headless project. Consequences for rollback:
+**[VERIFIED] The two are separate Wix properties, and there is nothing to migrate:**
+- Live site = a Wix **Editor** site, metaSiteId `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06` (confirmed
+  from its rendered HTML). The headless project is a **different** site, siteId
+  `9830980c-d83c-48fd-aa0c-d67c909406bd` (+ appId `00bcd193-…`). Different metaSite = different property.
+- **[VERIFIED via docs]** Wix cannot convert an Editor site to Wix-Managed Headless in place, nor
+  migrate its data in — it's an unshipped feature request. So go-live is inherently a **cross-property
+  domain move**, not an upgrade.
+- **[VERIFIED via owner dashboard audit, Aug 2026]** The legacy property holds **no business data to
+  preserve** — zero Contacts and zero Site Members beyond the account's own admin/staff logins (which
+  live at the account level and are unaffected), and the static site uses an external Square store.
+  So the migration is **static-site-only**; no members/email-campaign preservation plan is needed.
+  (For the record: even if data existed, Wix does **not** transfer Contacts-as-members or Email
+  Marketing history/reputation between properties (Wix support docs), and a site *duplicate* also
+  excludes all of that. The real recovery point is simply the intact legacy site itself, not a duplicate.)
+
+The deployed headless app is therefore a **fresh rebuild**. Consequences for rollback:
 
 **Rollback layers (strongest lever last):**
 1. **Prevent:** only `wix release` an artifact already validated via its `wix preview` URL.
@@ -100,15 +114,18 @@ existing Wix Editor site's content/data into a headless project. Consequences fo
    Cutover = reassign domain to the headless project; rollback = reassign back to the (intact) old site.
 
 **Cutover guidance:**
-- **[OPEN] Confirm what the current live REPAC site actually is** — a Wix Editor site vs. an external
-  host (the homepage references a `square.site` store). This changes rollback:
-  - If **Wix Editor site**: rollback is internal domain reassignment + an **SSL re-validation window**
-    (not an instant TTL flip — both sites are on Wix). **Keep the old Editor site published/undeleted.**
-  - If **external host**: lowering DNS TTL before cutover enables a fast repoint back — that classic
-    advice applies only here.
+- Live site type is **[RESOLVED]** — it's a Wix Editor site (§6 top). So rollback is an internal
+  **domain reassignment** between two Wix properties + an **SSL re-validation window** (not an instant
+  TTL flip — both sites are on Wix). **Keep the legacy Editor site published/undeleted** as the
+  rollback lever; do not delete it.
+- Reassignment is a supported first-class action (Domains → *Assign to a Different Site*). Both
+  properties can be Premium at once — that's just two plans (a paid **parity/overlap window** if you
+  want A and B both live before committing).
 - Wix-Managed Headless needs a **premium plan** to serve a custom domain.
 - Lowest-risk pattern: validate on a **subdomain** (e.g. `beta.repac-riverside.org`) before
   reassigning the apex `www.repac-riverside.org`.
+- **[DEFERRED]** Nothing here runs without explicit owner go-ahead (governing constraint: don't
+  disrupt the live site).
 
 ## 7. Ownership transfer / client handoff
 
