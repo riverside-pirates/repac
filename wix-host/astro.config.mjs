@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 
 import wix from '@wix/astro';
 import cloudProviderFetchAdapter from '@wix/cloud-provider-fetch-adapter';
-const isBuild = process.env.NODE_ENV == 'production';
+const isBuild = process.env.NODE_ENV === 'production';
 
 // Wix-Managed Headless wrapper. The REPAC static site is synced into `public/`
 // (see scripts/sync-static.mjs) and Wix serves it at the site root (`/` ->
