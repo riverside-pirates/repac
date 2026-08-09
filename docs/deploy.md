@@ -35,8 +35,8 @@ account owner; there is no CI that talks to Wix. Rationale in §3.
 | Local preview (`npm run deploy:preview`, owner browser login) | ✅ **[VERIFIED]** deploys, serves correctly |
 | Fail-fast auth preflight (`wix whoami` fronting deploy scripts) | ✅ aborts in ~4s when logged out, before the build |
 | CI | **none** — static site; no Wix CI (see §3) |
-| Release (`npm run deploy:release` → `wix release`) | **[DEFERRED]** — local, human-run; design in §5 |
-| DNS cutover + rollback | **[DEFERRED]** — runbook in §6 |
+| Release (`npm run deploy:release` → `wix release`) | **[READY]** — owner go-ahead granted (Aug 2026); local, human-run; §5 |
+| Domain cutover + rollback | **[READY, gated on premium plan]** — owner go-ahead granted; runbook in §6 |
 
 ## 3. Why there is no CI — the permission wall, and how we resolved it
 
@@ -76,21 +76,27 @@ aborts in seconds. CI does nothing Wix-related; the owner's local `wix build` is
   old keyed CI used were **deleted** as unused. (If a keyed approach is ever revisited, note that an
   API key cannot clear the §3 wall — that's why it was abandoned.)
 
-## 5. Release — **[DEFERRED]**, local & human-run
+## 5. Release — local & human-run (**owner go-ahead granted, Aug 2026**)
 
 Release is a local command, not a workflow (same reason as preview, §3):
-- `cd wix-host && npm run deploy:release` — `wix whoami` → build → `wix release`. Run only when
-  explicitly blessed. **[VERIFIED]** `wix release` produces **versioned** releases; **there is no
-  `wix rollback` command.**
-- **Governing constraint:** do **not** `wix release` or cut over DNS until the owner explicitly says
-  so. A release publishes a new headless version; it does not itself reassign the live domain (§6).
+- `cd wix-host && npm run deploy:release` — `wix whoami` → build → `wix release`. **[VERIFIED]**
+  `wix release` produces **versioned** releases; **there is no `wix rollback` command.**
+- Owner go-ahead is granted, so this is unblocked — but it stays a **deliberate owner-run action**,
+  not automation. A release publishes a new headless version; it does **not** itself reassign the live
+  domain — that's the separate cutover step (§6), which needs a premium plan and keeps the legacy
+  Editor site as the rollback lever.
 
 ## 6. Cutover & rollback — **[DEFERRED]**
 
 **[VERIFIED] The two are separate Wix properties, and there is nothing to migrate:**
-- Live site = a Wix **Editor** site, metaSiteId `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06` (confirmed
-  from its rendered HTML). The headless project is a **different** site, siteId
-  `9830980c-d83c-48fd-aa0c-d67c909406bd` (+ appId `00bcd193-…`). Different metaSite = different property.
+- Live site = a **classic Wix Editor** site, metaSiteId `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06`.
+  Probed `https://www.repac-riverside.org` directly: served by Wix's **Thunderbolt** viewer with
+  `"editorType":""`, `"isResponsive":false`, `"siteType":"UGC"` — the classic drag-and-drop Editor,
+  **not** Wix Studio (which reports a non-empty `editorType` and `isResponsive:true`) and not
+  Harmony; headers `server: Pepyaka` + `x-wix-meta-site-id` confirm Wix hosting. The `square.site`
+  store on the homepage is an outbound link, not the host. The headless project is a **different**
+  site, siteId `9830980c-d83c-48fd-aa0c-d67c909406bd` (+ appId `00bcd193-…`). Different metaSite =
+  different property.
 - **[VERIFIED via docs]** Wix cannot convert an Editor site to Wix-Managed Headless in place, nor
   migrate its data in — it's an unshipped feature request. So go-live is inherently a **cross-property
   domain move**, not an upgrade.
@@ -124,15 +130,17 @@ The deployed headless app is therefore a **fresh rebuild**. Consequences for rol
 - Wix-Managed Headless needs a **premium plan** to serve a custom domain.
 - Lowest-risk pattern: validate on a **subdomain** (e.g. `beta.repac-riverside.org`) before
   reassigning the apex `www.repac-riverside.org`.
-- **[DEFERRED]** Nothing here runs without explicit owner go-ahead (governing constraint: don't
-  disrupt the live site).
+- **Owner go-ahead: granted (Aug 2026).** Execution is still a deliberate owner-run step, not
+  automated — run it intentionally, keep the legacy Editor site published as the rollback lever, and
+  attach a premium plan first (custom domain requires it).
 
 ## 7. Ownership transfer / client handoff
 
-- The `WIX_API_KEY` is bound to **your** account; after transferring the site to the client, your key
-  loses site-level access (site-level calls need the owner account's key). **[VERIFIED via docs]**
-- Clean handoff: client (new owner) creates their own `WIX_API_KEY` → update the **one GitHub secret**
-  → delete your old key. Pipeline unchanged because the key only ever lives in the secret, not code.
+- Deploy auth is a **local owner `wix login`** session (§4), not a stored key — so handoff is simply:
+  the new owner logs in as themselves and runs the `npm run deploy:*` scripts. There is **no CI secret
+  to rotate** (the old `WIX_API_KEY` secret was deleted).
+- The new owner needs owner/co-owner rights on the headless project (appId `00bcd193-…`) to log in and
+  preview/release. **[VERIFIED via docs]** site-level operations require the owner account.
 - The preview URL host encodes the owner account (`…-drewshapiro.wix-site-host.com`) — it will change
   under the client's account.
 
@@ -141,8 +149,10 @@ The deployed headless app is therefore a **fresh rebuild**. Consequences for rol
 - **[RESOLVED]** `@astrojs/cloudflare` restored to `wix-host/package.json` (it's the fallback adapter
   when `WIX_CLOUD_PROVIDER` is unset). The §3 env-injection-vs-manual fork is closed: Shape B
   (human-run preview/release, no CI) is the chosen model.
-- **[DEFERRED]** Cutover/rollback once the live site type (§6) is confirmed and a premium plan is
-  attached. Release itself is already a local command (§5) — no `wix-release.yml` to build.
+- **[READY, owner go-ahead granted Aug 2026]** Cutover/rollback is no longer permission-blocked. The
+  remaining gate is **mechanical**: attach a premium plan (needed to serve the custom domain) and have
+  the owner run the release locally. The live site type is settled (§6, classic Wix Editor). Release is
+  already a local command (§5) — no `wix-release.yml` to build.
 
 ## 9. Quick reference
 
