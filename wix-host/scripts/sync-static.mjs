@@ -1,6 +1,6 @@
 // Copies the REPAC static site into wix-host/public/ so Astro serves it verbatim
 // at the site root. Run via `npm run sync-static`. Paths are resolved relative to
-// this script (not CWD) so it works the same locally and in CI.
+// this script (not CWD) so it works the same from any working directory.
 //
 // Source (repo root): every top-level *.html, plus css/, js/, images/.
 // Destination: wix-host/public/ (cleared first; gitignored — never committed).
