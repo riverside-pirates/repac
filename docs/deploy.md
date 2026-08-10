@@ -36,7 +36,7 @@ account owner; there is no CI that talks to Wix. Rationale in §3.
 | Fail-fast auth preflight (`wix whoami` fronting deploy scripts) | ✅ aborts in ~4s when logged out, before the build |
 | CI | **none** — static site; no Wix CI (see §3) |
 | Release (`npm run deploy:release` → `wix release`) | **[READY]** — owner go-ahead granted (Aug 2026); local, human-run; §5 |
-| Domain cutover + rollback | **[BLOCKED on account consolidation]** — domain + P_B must share one account (operator is only co-owner of P_A); then premium plan; §6 prerequisites |
+| Domain cutover + rollback | **[BLOCKED on account consolidation]** — transfer P_B into the org owner's account (co-locate with P_A + domain), then premium plan; org officers run the swap; §6 prerequisites |
 
 ## 3. Why there is no CI — the permission wall, and how we resolved it
 
@@ -151,26 +151,35 @@ to confuse when the account holds several sites). The blue-green pair:
   `9dbcaac9-…`.
 - Any site whose id is **neither** of these is unrelated to the migration — do not touch it.
 
-**2. [BLOCKER] Consolidate P_A + the domain + P_B into ONE Wix account.** Domain reassignment
+**2. [BLOCKER] Consolidate P_A + the domain + P_B into the ORG owner's account.** Domain reassignment
 (*Domains → Assign to a Different Site*) is a **within-account** operation — the target dropdown only
-lists sites in the account that holds the domain. Cross-account transfer of a domain is an
-**owner-only** action (a co-owner cannot do it, and cannot transfer a site). As of Aug 2026 the
-operator is only a **co-owner** of P_A, so the domain almost certainly lives in a *different* account
-from P_B (which is in the operator's own account) → the swap can't be done as-is.
-- **Resolution:** have P_A's current account owner run **Transfer a Premium Site to Another Wix
-  Account**, moving P_A **with the domain included** into the operator's account. That co-locates the
-  domain, P_A, and P_B in one account, so **both** cutover (P_A→P_B) and rollback (P_B→P_A) become
-  in-account. A domain-only transfer is insufficient — it fixes cutover but leaves rollback
-  cross-account.
-- Consequences to line up first: billing/premium for P_A moves to the new account; re-invite the
-  previous owner as a co-owner if they still need access; `.org` transfers freely (not one of Wix's
-  whole-site-only extensions).
-- **Governance:** taking ownership of the org's Wix site/domain is an organizational decision beyond
-  the migration go-ahead — get explicit leadership sign-off on record before requesting the transfer.
+lists sites in the account that holds the domain. As of Aug 2026 the operator is only a **co-owner**
+of P_A; the domain lives in the **org owner's** account (an org officer), while P_B was created in the
+operator's own account → they're in *different* accounts, so the swap can't be done as-is.
+- **Consolidation direction: bring P_B TO the org, not P_A to the operator.** Ownership of the org's
+  web presence stays with the org; the operator's ownership of P_B is **transient**. The operator
+  (current owner of P_B) initiates **Transfer a Premium Site to Another Wix Account** → the org owner's
+  account; the org owner accepts. That co-locates domain + P_A + P_B in the **org** account, so the
+  org officers can run **both** cutover (P_A→P_B) and rollback (P_B→P_A) in-account.
+- **Operator keeps push access as co-owner/admin on both envs.** After the transfer, the org owner
+  re-invites the operator as co-owner on P_B (and they already are on P_A), so the operator remains
+  the technical deployer for both. `wix.config.json`'s `siteId` is unchanged by the transfer (the
+  metaSite id is stable across account moves), so the repo keeps deploying to the same P_B.
+- **[VERIFY — risk] Does co-owner/admin suffice for `wix release`/`preview`?** The deploy path (§3/§4)
+  was only ever proven as the **account owner** of P_B; the blocking permission `VELO.APP_PROJECT_READ`
+  is described as *project-owner* level. Whether a co-owner's `wix login` session clears it is
+  **untested**. Confirm the operator can still `deploy:preview`/`deploy:release` to P_B **after** the
+  ownership transfer, while the org owner is available as a fallback deployer. If co-owner is
+  insufficient, either the org owner deploys or the operator is granted owner — do not discover this
+  after cutover.
+- `.org` transfers freely (not one of Wix's whole-site-only extensions). Sequencing: **practice and
+  validate the green env while the operator still owns P_B (step 4), then transfer** — so nothing is
+  handed over unproven.
 
-**3. Attach the premium plan to the RIGHT account/site.** Wix-Managed Headless needs a premium plan to
-serve a custom domain, and Premium is per-site. Buy/assign it **after** account consolidation (step 2)
-so it lands on P_B in the account that holds the domain — not on the operator's old account by mistake.
+**3. Attach the premium plan to P_B in the ORG account.** Wix-Managed Headless needs a premium plan to
+serve a custom domain, and Premium is per-site. Buy/assign it **after** the transfer (step 2) so it
+lands on P_B **in the org owner's account** (the one holding the domain) — not on the operator's
+account by mistake.
 
 **4. Validate the P_B preview before any release/cutover** (this is what rollback-layer-1 "validated
 via its preview URL" means). Run `npm run deploy:preview` (§9), open the ephemeral URL, and confirm:
