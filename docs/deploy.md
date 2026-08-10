@@ -134,7 +134,32 @@ The deployed headless app is therefore a **fresh rebuild**. Consequences for rol
   automated — run it intentionally, keep the legacy Editor site published as the rollback lever, and
   attach a premium plan first (custom domain requires it).
 
-### Cutover prerequisites — do these BEFORE touching the domain
+### Execution — three stages (validate green, then hand to blue)
+
+Blue = **P_A** (legacy, live). Green = **P_B** (headless, new). The rollout proves green under
+progressively less privilege, then hands it to the org so *they* control the domain switch.
+
+- **Stage I — deploy to green as OWNER.** Prove the green env itself. While the operator still owns
+  P_B: get the deployable state onto `main` (merge infra + content PRs, esp. the banner removal),
+  `npm run deploy:preview`, run the **preview validation checklist** (detail 4 below), then
+  `npm run deploy:release`. **Exit:** a validated, released P_B. Fully in the operator's control; no
+  org involvement.
+- **Stage II — deploy to green as ADMIN (co-owner).** Prove the operator can still deploy *without*
+  owner — the one untested assumption (detail 2, `[VERIFY]`). Cheapest faithful test is a
+  **colleague-sandbox round-trip**: transfer P_B to a trusted colleague → they re-invite the operator
+  as co-owner → operator runs `deploy:preview` as co-owner → colleague transfers P_B back. (Or test
+  against a throwaway headless project the colleague owns, never touching P_B.) The wall is
+  role-based on the project, so a colleague-owner is a faithful proxy for the org-owner. **Exit:**
+  co-owner deploy proven — or, if it fails, "who deploys" settled *before* any org handoff, with no
+  production account touched.
+- **Stage III — site-transfer green to BLUE's owner (REPAC's account) for the domain switch.** Only
+  after I + II pass: operator transfers P_B into REPAC's Wix account (the one holding P_A + the
+  domain); REPAC re-invites the operator as co-owner; attach P_B's premium plan there (detail 3).
+  Then REPAC's officers reassign the domain P_A→P_B **at their discretion** — subdomain
+  (`beta.`) first, then the apex — with rollback = reassign back to P_A. **Exit:** cutover owned by
+  the org; the operator remains the co-owner/admin deployer for both envs.
+
+### Supporting detail for the stages
 
 **1. Identify the two properties by ID, never by console display name** (names are editable and easy
 to confuse when the account holds several sites). The blue-green pair:
@@ -168,17 +193,15 @@ operator's own account → they're in *different* accounts, so the swap can't be
 - **[VERIFY — risk] Does co-owner/admin suffice for `wix release`/`preview`?** The deploy path (§3/§4)
   was only ever proven as the **account owner** of P_B; the blocking permission `VELO.APP_PROJECT_READ`
   is described as *project-owner* level. Whether a co-owner's `wix login` session clears it is
-  **untested**. Confirm the operator can still `deploy:preview`/`deploy:release` to P_B **after** the
-  ownership transfer, while the org owner is available as a fallback deployer. If co-owner is
-  insufficient, either the org owner deploys or the operator is granted owner — do not discover this
-  after cutover.
-- `.org` transfers freely (not one of Wix's whole-site-only extensions). Sequencing: **practice and
-  validate the green env while the operator still owns P_B (step 4), then transfer** — so nothing is
+  **untested** — this is what **Stage II** proves. If co-owner is insufficient, either the org owner
+  deploys or the operator is granted owner — settle it in Stage II, not after cutover.
+- `.org` transfers freely (not one of Wix's whole-site-only extensions). Sequencing: **Stage I/II
+  prove green while the operator still owns P_B; only then Stage III transfers it** — so nothing is
   handed over unproven.
 
 **3. Attach the premium plan to P_B in the ORG account.** Wix-Managed Headless needs a premium plan to
-serve a custom domain, and Premium is per-site. Buy/assign it **after** the transfer (step 2) so it
-lands on P_B **in the org owner's account** (the one holding the domain) — not on the operator's
+serve a custom domain, and Premium is per-site. Buy/assign it **during Stage III** (after the transfer)
+so it lands on P_B **in the org owner's account** (the one holding the domain) — not on the operator's
 account by mistake.
 
 **4. Validate the P_B preview before any release/cutover** (this is what rollback-layer-1 "validated
