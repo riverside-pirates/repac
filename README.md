@@ -15,7 +15,7 @@ REPAC is a 501(c)(3) nonprofit organization founded in 2008 that supports the Pr
 | **Public site** | This repo, served at `www.repac-riverside.org` | Legacy Wix site at `www.repac-riverside.org`, edited in the Wix visual editor. Not in this repo. |
 | **Wix site type** | Headless project (Wix-Managed Headless) — Wix hosts our Astro app in `wix-host/` | Classic **Wix Editor** site (verified: Thunderbolt viewer, `editorType:""`, `isResponsive:false`) |
 | **Source of truth** | This repo | The legacy Wix site. This repo is a not-yet-launched replacement. |
-| **Hosting** | Wix-Managed Headless, deployed from CI | Nothing. The site runs only on a local `python3 -m http.server`. No hosting, no CI, no domain pointed here. |
+| **Hosting** | Wix-Managed Headless, released locally by an owner (no CI — see `docs/deploy.md`) | Nothing. The site runs only on a local `python3 -m http.server`. No hosting, no domain pointed here. |
 | **Pages** | Consolidated IA (see `SITE_ANALYSIS.md`) | The pages listed under *Site Structure* below, content-incomplete |
 | **Content** | Reviewed and approved by REPAC leadership | Unreviewed. Drafted from the legacy site plus inference; some facts unverified. |
 
@@ -33,11 +33,11 @@ Some sections ship a visible placeholder block instead of real content. To find 
 grep -rn 'class="placeholder"' *.html
 ```
 
-**2. Deployment** — engineering. The decision is locked: Wix-Managed Headless, because Wix is load-bearing for the org and moving off it is a separate fight. The shape is an Astro wrapper in `wix-host/` that serves these static files from `public/`, GitHub Actions running `wix preview` per PR and `wix release` to production, then a DNS cutover. If `wix-host/` and `.github/workflows/` aren't present in this repo, that work hasn't landed.
+**2. Deployment** — engineering. The decision is locked: Wix-Managed Headless, because Wix is load-bearing for the org and moving off it is a separate fight. The shape is an Astro wrapper in `wix-host/` that serves these static files from `public/`. Preview and release are **run locally by an account owner** (`npm run deploy:preview` / `deploy:release` in `wix-host/`) — **not** CI-driven: Wix's privileged CLI steps require an owner session that an API key can't hold, so there is no deploy workflow. If `wix-host/` isn't present in this repo, that work hasn't landed.
 
 This is a move between two different [types of Wix site](https://dev.wix.com/docs/overview/platform-overview/types-of-wix-sites): a Wix Editor site today, a headless project after launch. Two consequences worth stating up front. Nothing migrates — Wix cannot carry an Editor site's pages or data into a headless project, so this repo is a rebuild, not an import. And because both old and new live on Wix, cutover and rollback are a **domain reassignment inside Wix**, with an SSL re-validation window — not a DNS TTL flip. Keep the old Editor site published and undeleted until well after launch; it is the rollback target.
 
-Three questions were open at the time this plan was approved and need a Wix account to settle: whether `wix release` can run non-interactively in CI, the exact API-key permission scope for headless build/release, and an Astro `public/` vs `src/pages` route collision. The deployment work carries its own notes under `docs/`; that's where the answers belong once known, and this section should shrink to a pointer once they're written down.
+**The canonical deployment reference is [`docs/deploy.md`](docs/deploy.md)** — why there's no CI (the owner-permission wall), the local owner-run preview/release flow, auth, and the cutover/rollback runbook. The questions that were open when this plan was approved (non-interactive `wix release` in CI, API-key permission scope, `public/` vs `src/pages` routing) are resolved there.
 
 ## Site Structure
 

@@ -1,0 +1,4 @@
+# Collapse generated lockfiles in diffs / exclude from language stats.
+# The lockfile stays TRACKED (`npm ci` needs it for reproducible installs) —
+# this only hides the noise.
+wix-host/package-lock.json linguist-generated=true -diff

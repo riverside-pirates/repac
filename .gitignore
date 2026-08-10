@@ -1,0 +1,20 @@
+# Claude Code worktrees + local session handoff
+.claude/worktrees/
+HANDOFF.md
+
+# OS cruft
+.DS_Store
+
+# Wix headless wrapper (generated / installed)
+wix-host/public/
+wix-host/dist/
+wix-host/node_modules/
+wix-host/.astro/
+wix-host/.wix/
+
+# Wix local secrets + crash logs (never commit — contain client secret / keys).
+# .env.local holds the headless OAuth app identity; the local `wix login` browser
+# session (~/.wix/auth) is what authorizes preview/release.
+wix-host/.env.local
+wix-host/.env*.local
+wix-error.log
