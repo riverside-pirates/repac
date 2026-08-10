@@ -36,7 +36,7 @@ account owner; there is no CI that talks to Wix. Rationale in §3.
 | Fail-fast auth preflight (`wix whoami` fronting deploy scripts) | ✅ aborts in ~4s when logged out, before the build |
 | CI | **none** — static site; no Wix CI (see §3) |
 | Release (`npm run deploy:release` → `wix release`) | **[READY]** — owner go-ahead granted (Aug 2026); local, human-run; §5 |
-| Domain cutover + rollback | **[READY, gated on premium plan]** — owner go-ahead granted; runbook in §6 |
+| Domain cutover + rollback | **[BLOCKED on account consolidation]** — domain + P_B must share one account (operator is only co-owner of P_A); then premium plan; §6 prerequisites |
 
 ## 3. Why there is no CI — the permission wall, and how we resolved it
 
@@ -133,6 +133,61 @@ The deployed headless app is therefore a **fresh rebuild**. Consequences for rol
 - **Owner go-ahead: granted (Aug 2026).** Execution is still a deliberate owner-run step, not
   automated — run it intentionally, keep the legacy Editor site published as the rollback lever, and
   attach a premium plan first (custom domain requires it).
+
+### Cutover prerequisites — do these BEFORE touching the domain
+
+**1. Identify the two properties by ID, never by console display name** (names are editable and easy
+to confuse when the account holds several sites). The blue-green pair:
+
+| | Property | Fixed ID | Role |
+|---|---|---|---|
+| **P_A** | Legacy Editor site | metaSiteId `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06` | Live now; **keep** = rollback target |
+| **P_B** | Headless project | siteId `9830980c-d83c-48fd-aa0c-d67c909406bd` (appId `00bcd193-…`) | Deploy target (= `wix-host/wix.config.json`) |
+
+- Confirm P_B in the console by the metaSiteId in its dashboard URL (`…/dashboard/9830980c-…/`) and
+  that it matches `wix.config.json` — the repo can only deploy where that file points.
+- Confirm P_A by re-reading the live domain's own id (no console needed):
+  `curl -s https://www.repac-riverside.org/ | grep -o '"metaSiteId":"[^"]*"' | head -1` → expect
+  `9dbcaac9-…`.
+- Any site whose id is **neither** of these is unrelated to the migration — do not touch it.
+
+**2. [BLOCKER] Consolidate P_A + the domain + P_B into ONE Wix account.** Domain reassignment
+(*Domains → Assign to a Different Site*) is a **within-account** operation — the target dropdown only
+lists sites in the account that holds the domain. Cross-account transfer of a domain is an
+**owner-only** action (a co-owner cannot do it, and cannot transfer a site). As of Aug 2026 the
+operator is only a **co-owner** of P_A, so the domain almost certainly lives in a *different* account
+from P_B (which is in the operator's own account) → the swap can't be done as-is.
+- **Resolution:** have P_A's current account owner run **Transfer a Premium Site to Another Wix
+  Account**, moving P_A **with the domain included** into the operator's account. That co-locates the
+  domain, P_A, and P_B in one account, so **both** cutover (P_A→P_B) and rollback (P_B→P_A) become
+  in-account. A domain-only transfer is insufficient — it fixes cutover but leaves rollback
+  cross-account.
+- Consequences to line up first: billing/premium for P_A moves to the new account; re-invite the
+  previous owner as a co-owner if they still need access; `.org` transfers freely (not one of Wix's
+  whole-site-only extensions).
+- **Governance:** taking ownership of the org's Wix site/domain is an organizational decision beyond
+  the migration go-ahead — get explicit leadership sign-off on record before requesting the transfer.
+
+**3. Attach the premium plan to the RIGHT account/site.** Wix-Managed Headless needs a premium plan to
+serve a custom domain, and Premium is per-site. Buy/assign it **after** account consolidation (step 2)
+so it lands on P_B in the account that holds the domain — not on the operator's old account by mistake.
+
+**4. Validate the P_B preview before any release/cutover** (this is what rollback-layer-1 "validated
+via its preview URL" means). Run `npm run deploy:preview` (§9), open the ephemeral URL, and confirm:
+- `/` returns **200** and renders the real homepage (not the 404 route).
+- Key sub-pages load: `about.html`, `engineering-program.html`, `events.html`, `repac-faq.html`.
+- Assets resolve: `css/style.css` and `js/main.js` return 200 (no broken styling/nav).
+- The **UNOFFICIAL DRAFT banner is absent** (it ships from content branch #58; only launch a preview
+  built from a branch where it's removed).
+- A bogus path (e.g. `/nope`) serves the 404 page.
+
+Quick automated pass against the preview host:
+```bash
+BASE="https://<preview-host>.wix-site-host.com"   # from `npm run deploy:preview` output
+for p in / about.html engineering-program.html events.html repac-faq.html css/style.css js/main.js; do
+  printf '%s %s\n' "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/$p")" "$p"
+done            # expect 200 for every line
+```
 
 ## 7. Ownership transfer / client handoff
 
