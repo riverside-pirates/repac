@@ -124,6 +124,27 @@ The deployed headless app is therefore a **fresh rebuild**. Consequences for rol
   **domain reassignment** between two Wix properties + an **SSL re-validation window** (not an instant
   TTL flip — both sites are on Wix). **Keep the legacy Editor site published/undeleted** as the
   rollback lever; do not delete it.
+- **[VERIFIED] The legacy property also hosts live assets the new site links to — a second, separate
+  reason not to delete it.** Two PDFs are served from
+  `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06.filesusr.com/ugd/…` — that host *is* the legacy metaSiteId,
+  i.e. the old Editor site's Media Manager. Deleting the legacy property breaks them even after a
+  successful cutover, when the rollback-lever argument above no longer feels urgent. Retiring the
+  legacy site is therefore **not** a no-op cleanup task — the PDFs must be moved first, per the
+  policy below.
+
+**Document-hosting policy.** Organizational documents the site links to — bylaws, minutes, forms,
+handbooks, slide decks — are hosted in the **REPAC Google account's Drive** and linked from the site.
+Not in this repo, and not in either Wix property's Media Manager.
+
+- **Why Drive:** REPAC officers can update a document without a code change or a deploy, the files
+  survive both the legacy site's retirement and any future platform move, and ownership follows the
+  org's Google account rather than a personal one or a hosting vendor. The site already links to
+  Drive and Google Docs/Forms elsewhere, so this is the existing pattern made explicit.
+- **Sharing:** each linked file must be *Anyone with the link → Viewer*, owned by the REPAC account
+  (not an individual's), or the link 404s for the public — and CI's link check will fail on it.
+- **Exception:** small assets that are genuinely part of the page (logos, badges, photos) stay in
+  `images/` in this repo. The policy covers documents, not page furniture.
+- **Migration owed:** the two `filesusr.com` PDFs above predate this policy and still need moving.
 - Reassignment is a supported first-class action (Domains → *Assign to a Different Site*). Both
   properties can be Premium at once — that's just two plans (a paid **parity/overlap window** if you
   want A and B both live before committing).
