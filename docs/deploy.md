@@ -164,9 +164,10 @@ commerce is an external Square store. The recovery point is simply the intact le
 
 Prove GREEN under progressively less privilege, then hand the domain switch to the org.
 
-- **Stage I — deploy to GREEN as OWNER.** While the operator still owns GREEN: get the deployable state
-  onto `main` (including banner removal), `deploy:preview`, validate (§4), `deploy:release`.
-  *Exit:* a validated, released GREEN. No org involvement.
+- **Stage I — deploy to GREEN as OWNER.** While the operator still owns GREEN: `deploy:preview`,
+  validate (§4), `deploy:release`. The build copies from the working tree, so preview from whatever
+  branch has the banner removed — no merge to `main` required, and the draft banner stays on the
+  repo's default branch until launch. *Exit:* a validated, released GREEN. No org involvement.
 - **Stage II — deploy to GREEN as ADMIN (co-owner).** Prove the untested assumption above. Cheapest
   faithful test is a colleague-sandbox round-trip: transfer GREEN to a trusted colleague → they re-invite
   the operator as co-owner → operator runs `deploy:preview` → colleague transfers GREEN back. The wall is
