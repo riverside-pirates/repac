@@ -19,7 +19,7 @@ REPAC is a 501(c)(3) nonprofit organization founded in 2008 that supports the Pr
 | **Pages** | Consolidated IA (see `SITE_ANALYSIS.md`) | The pages listed under *Site Structure* below, content-incomplete |
 | **Content** | Reviewed and approved by REPAC leadership | Unreviewed. Drafted from the legacy site plus inference; some facts unverified. |
 
-Because none of this is live, `js/main.js` injects a red **UNOFFICIAL DRAFT** banner on every page pointing visitors back to the real site. Its presence is the quickest check on whether the table above still holds — the banner comes out at launch and not before.
+The red **UNOFFICIAL DRAFT** banner that `js/main.js` used to inject on every page has been removed in preparation for launch. Nothing else marks these pages as a draft, so the table above — not anything visible on the page — is what tells you whether this is live yet.
 
 ## What stands between here and launch
 
@@ -56,7 +56,7 @@ student-activities.html     TSA, clubs, community service
 events.html                 Events calendar
 fundraising.html            Spirit wear, fundraising
 css/style.css               Shared stylesheet
-js/main.js                  Shared JS (draft banner, nav toggle, FAQ accordion)
+js/main.js                  Shared JS (nav toggle, FAQ accordion, calendar loading)
 images/                     Image assets
 ```
 
