@@ -4,7 +4,9 @@
 
 **Version:** 1.0
 **Date:** 2026-03-09
-**Status:** Current State Analysis & Requirements
+**Status:** Requirements spec of record — the intended source for the README-level docs.
+Sections below are as of 2026-03-09 and have drifted; reconciling them is a separate pass. Until
+then, `README.md` and `docs/deploy.md` describe actual state.
 
 ---
 
