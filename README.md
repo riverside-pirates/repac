@@ -25,7 +25,7 @@ Because none of this is live, `js/main.js` injects a red **UNOFFICIAL DRAFT** ba
 
 Two independent tracks. Neither blocks the other.
 
-**1. Content and facts** — the larger track, and the one that needs people, not code. Faculty bios and photos, executive board roster, verified founding/incorporation dates, correct faculty roles, the PLTW courses not yet described, sponsor logos, and outbound links (DPS CTE lottery, Google Group, calendar iCal). The authoritative list is `TODO.md` plus the repo issues.
+**1. Content and facts** — the larger track, and the one that needs people, not code. Faculty bios and photos, executive board roster, verified founding/incorporation dates, correct faculty roles, the PLTW courses not yet described, sponsor logos, and outbound links (DPS CTE lottery, Google Group, calendar iCal). The authoritative list is the repo issues.
 
 Some sections ship a visible placeholder block instead of real content. To find every one still outstanding:
 
@@ -33,7 +33,7 @@ Some sections ship a visible placeholder block instead of real content. To find 
 grep -rn 'class="placeholder"' *.html
 ```
 
-**2. Deployment** — engineering. The decision is locked: Wix-Managed Headless, because Wix is load-bearing for the org and moving off it is a separate fight. The shape is an Astro wrapper in `wix-host/` that serves these static files from `public/`. Preview and release are **run locally by an account owner** (`npm run deploy:preview` / `deploy:release` in `wix-host/`) — **not** CI-driven: Wix's privileged CLI steps require an owner session that an API key can't hold, so there is no deploy workflow. If `wix-host/` isn't present in this repo, that work hasn't landed.
+**2. Deployment** — engineering. The decision is locked: Wix-Managed Headless, because Wix is load-bearing for the org and moving off it is a separate fight. The shape is an Astro wrapper in `wix-host/` that serves these static files from `public/`. Preview and release are **run locally by an account owner** (`npm run deploy:preview` / `deploy:release` in `wix-host/`) — **not** CI-driven: Wix's privileged CLI steps require an owner session that an API key can't hold, so there is no deploy workflow.
 
 This is a move between two different [types of Wix site](https://dev.wix.com/docs/overview/platform-overview/types-of-wix-sites): a Wix Editor site today, a headless project after launch. Two consequences worth stating up front. Nothing migrates — Wix cannot carry an Editor site's pages or data into a headless project, so this repo is a rebuild, not an import. And because both old and new live on Wix, cutover and rollback are a **domain reassignment inside Wix**, with an SSL re-validation window — not a DNS TTL flip. Keep the old Editor site published and undeleted until well after launch; it is the rollback target.
 
@@ -76,6 +76,5 @@ python3 -m http.server 8000
 ## Where the rest of the context lives
 
 - `SITE_ANALYSIS.md` — audit of the legacy Wix site and the rationale for consolidating it. Start here to understand *why* the new IA looks like it does.
-- `TODO.md` — pre-launch / post-launch / technical backlog. Overlaps the issues below; where they disagree, the issues are newer.
 - [GitHub issues](https://github.com/riverside-pirates/repac/issues) — the live worklist.
-- `OPENSPEC.md` — change-proposal conventions for this repo.
+- `OPENSPEC.md` — the requirements spec of record: sitemap, per-page content requirements, functional and non-functional requirements. The intent is that this doc becomes the source these README-level docs summarize.

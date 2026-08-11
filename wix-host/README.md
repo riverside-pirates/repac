@@ -19,17 +19,16 @@ npm run build          # sync-static + wix build -> dist/ (server output)
 
 `npm run sync-static` alone re-copies the root static files into `public/` after you edit them.
 
-Local secrets from `wix create ... link` live in `.env.local` (gitignored — contains the Wix client
-secret) and are read by the build.
+Local secrets live in `.env.local` (gitignored — contains the Wix client secret) and are read by the
+build. It doesn't travel with git: run `npx wix env pull` once per checkout, logged in as owner.
 
 ### Publish a preview
 
-Preview and release are **human-run**, not automated. Wix's privileged operations require an
-account-**owner** session, which an API key can't hold (see `docs/deploy.md` §3), so there is no CI
-that publishes previews — you do it locally.
+Preview and release are **human-run**, not automated — see [`docs/deploy.md`](../docs/deploy.md) for why.
 
 ```bash
 npx wix login           # one-time owner login (opens a browser; session lasts ~4h)
+npx wix env pull        # one-time per checkout: writes the gitignored .env.local
 npm run deploy:preview  # wix whoami (fail-fast auth check) -> build -> wix preview -> ephemeral URL
 ```
 

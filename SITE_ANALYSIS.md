@@ -70,6 +70,10 @@ The current site has significant page sprawl. Many pages serve overlapping purpo
 
 ### 2. Ditch Wix
 
+> **Superseded.** The decision is to stay on Wix, via Wix-Managed Headless — Wix is load-bearing for
+> the org and moving off it is a separate fight. The critique below still explains why the *classic
+> Editor* site is being replaced. See [`docs/deploy.md`](docs/deploy.md).
+
 Wix is a poor choice for this type of site:
 
 - **Terrible SEO/crawlability** -- all content renders client-side via JavaScript, meaning search engines and tools struggle to index it
