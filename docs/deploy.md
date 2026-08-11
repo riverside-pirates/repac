@@ -59,8 +59,11 @@ Abandoned approaches, recorded so they aren't reopened:
   before the build. If a script stops there, re-run `npx wix login`.
 - **`.env.local`** (`WIX_CLIENT_ID` / `_SECRET` / `_PUBLIC_KEY` / `_INSTANCE_ID` / `WIX_CLOUD_PROVIDER`)
   is the headless OAuth app's identity, read by the build. It is gitignored, so it **does not travel
-  with git**: every checkout and every deployer needs their own via `npx wix env pull` while logged in
-  as owner. A checkout without one fails the build with `WIX_CLIENT_ID not found`.
+  with git**: every checkout and every deployer needs their own via
+  [`wix env pull`](https://dev.wix.com/docs/wix-cli/command-reference/project-commands/env-pull) while
+  logged in. A checkout without one fails the build with `WIX_CLIENT_ID not found`. For secrets a
+  collaborator can't pull, see
+  [Share Environment Variables](https://dev.wix.com/docs/go-headless/wix-managed-headless/project-development/environment-variables/share-environment-variables).
 - **No CI credentials.** The old `WIX_API_KEY` secret and `WIX_CLIENT_ID` repo variable were deleted
   as unused — an API key cannot clear the §2 wall.
 
@@ -72,9 +75,11 @@ npm run deploy:preview   # whoami -> build -> wix preview   (ephemeral URL; safe
 npm run deploy:release   # whoami -> build -> wix release   (deliberate, owner-run)
 ```
 
-Owner go-ahead for release was granted Aug 2026. `wix release` publishes a **versioned** headless
-release; there is no `wix rollback` command, and a release does **not** reassign the live domain —
-that is the separate cutover in §5.
+Owner go-ahead for release was granted Aug 2026. There is no `wix rollback` command, and a release
+does **not** reassign the live domain — that is the separate cutover in §5. Two useful properties from
+Wix's [Build and Deploy a Headless Project](https://dev.wix.com/docs/go-headless/wix-managed-headless/full-integration-astro/development/build-and-deploy-with-the-cli):
+each preview URL is pinned to its own version and later pushes don't alter it, and `wix release`
+clears the whole site cache — if stale content survives a deploy, release again.
 
 Validate a preview before any release or cutover — open the ephemeral URL and confirm `/` renders the
 real homepage (not the 404 route), that the UNOFFICIAL DRAFT banner is absent, and that a bogus path
@@ -128,22 +133,30 @@ commerce is an external Square store. The recovery point is simply the intact le
 **Rollback layers, strongest lever last:**
 1. Only release an artifact already validated via its preview URL (§4).
 2. `git revert <bad-commit>` → re-release. Deterministic, repo is source of truth. Primary rollback.
-3. Re-promote an earlier Wix release version from the dashboard — exact UI unconfirmed; rely on 2.
+3. Re-promote an earlier release from the dashboard — Wix documents versioned releases for *apps*,
+   not for headless projects, so treat this as unavailable and rely on 2.
 4. Reassign the domain back to BLUE. A domain maps to one property at a time; both can be Premium at
    once. This is a within-Wix reassignment with an SSL re-validation window, not a DNS TTL flip.
 
 ### Prerequisites
 
-- **[BLOCKER] Consolidate BLUE, the domain, and GREEN into the org owner's account.** Domain reassignment
-  (*Domains → Assign to a Different Site*) only lists sites **within the account holding the domain**.
+- **[BLOCKER] Consolidate BLUE, the domain, and GREEN into the org owner's account.** Wix scopes
+  reassignment to the account: *"Assign any domain **in your Wix account** to your site"*
+  ([Assigning a Domain to a Site](https://support.wix.com/en/article/assigning-a-domain-to-a-site-in-your-wix-account)).
   Today the domain and BLUE are in the org owner's account and GREEN is in the operator's, so the swap
-  cannot be done as-is. Direction: bring **GREEN to the org** (*Transfer a Premium Site to Another Wix
-  Account*), not BLUE to the operator — the org keeps ownership of its web presence. `.org` transfers
-  freely, and the metaSite id is stable across account moves, so the repo keeps deploying to the same
-  GREEN. The org owner then re-invites the operator as co-owner so they remain the technical deployer.
-- **[VERIFY] Does co-owner/admin suffice for `release`/`preview`?** The deploy path was only ever
-  proven as the account *owner* of GREEN, and the blocking permission is described as project-owner
-  level. Stage II settles this.
+  cannot be done as-is. Direction: bring **GREEN to the org**
+  ([Transferring a Premium Site to Another Wix Account](https://support.wix.com/en/article/transferring-a-premium-site-to-another-wix-account)),
+  not BLUE to the operator — the org keeps ownership of its web presence. The transfer form has
+  separate opt-in checkboxes for the site plan and the domain, the recipient needs an existing Wix
+  account, and **the invite expires in 3 days**
+  ([Accepting Transferred Site Ownership](https://support.wix.com/en/article/accepting-transferred-site-ownership)),
+  so coordinate it live rather than emailing and waiting. The metaSite id is stable across account
+  moves, so the repo keeps deploying to the same GREEN.
+- **[VERIFY] Does co-owner/admin suffice for `release`/`preview`?** Wix documents that a collaborator
+  added to the project can `wix env pull` and "build, preview, and release it with the Wix CLI, just
+  like you can" ([Invite Collaborators](https://dev.wix.com/docs/go-headless/project-management/invite-collaborators)) —
+  so this is expected to work. Our 403 (§2) was an API key, not a human collaborator. Stage II
+  confirms it in this account before anything is handed over.
 - **Premium plan on GREEN, bought in the org account** (after the transfer) — Wix-Managed Headless needs
   one to serve a custom domain, and Premium is per-site.
 
