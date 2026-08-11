@@ -25,7 +25,7 @@ Because none of this is live, `js/main.js` injects a red **UNOFFICIAL DRAFT** ba
 
 Two independent tracks. Neither blocks the other.
 
-**1. Content and facts** — the larger track, and the one that needs people, not code. Faculty bios and photos, executive board roster, verified founding/incorporation dates, correct faculty roles, the PLTW courses not yet described, sponsor logos, and outbound links (DPS CTE lottery, Google Group, calendar iCal). The authoritative list is the repo issues.
+**1. Content and facts** — the larger track, and the one that needs people, not code. Faculty bios and photos, executive board roster, verified founding/incorporation dates, correct faculty roles, the PLTW courses not yet described, sponsor logos, and outbound links (DPS CTE lottery, Google Group, calendar iCal). The authoritative list is `TODO.md` plus the repo issues.
 
 Some sections ship a visible placeholder block instead of real content. To find every one still outstanding:
 
@@ -76,5 +76,6 @@ python3 -m http.server 8000
 ## Where the rest of the context lives
 
 - `SITE_ANALYSIS.md` — audit of the legacy Wix site and the rationale for consolidating it. Start here to understand *why* the new IA looks like it does.
+- `TODO.md` — pre-launch / post-launch / technical backlog. Overlaps the issues below; where they disagree, the issues are newer.
 - [GitHub issues](https://github.com/riverside-pirates/repac/issues) — the live worklist.
 - `OPENSPEC.md` — the requirements spec of record: sitemap, per-page content requirements, functional and non-functional requirements. The intent is that this doc becomes the source these README-level docs summarize.

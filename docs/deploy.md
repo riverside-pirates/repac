@@ -130,6 +130,21 @@ Wix cannot convert an Editor site to headless in place or migrate its data, so g
 data on BLUE to preserve — zero Contacts, zero Site Members beyond account-level admin logins, and
 commerce is an external Square store. The recovery point is simply the intact legacy site.
 
+**BLUE also hosts live assets — a second, independent reason not to delete it.** Two PDFs the site
+links to are served from `9dbcaac9-….filesusr.com/ugd/…`, and that host *is* BLUE's metaSiteId: they
+live in the legacy site's Media Manager. Deleting BLUE breaks them even after a successful cutover —
+exactly when the rollback-lever argument stops feeling urgent. Retiring BLUE is **not** a no-op
+cleanup task; move the PDFs first.
+
+**Document-hosting policy.** Organizational documents the site links to — bylaws, minutes, forms,
+handbooks, decks — live in the **REPAC Google account's Drive**, not in this repo and not in either
+Wix property's Media Manager. Officers can update them without a deploy, they survive BLUE's
+retirement and any future platform move, and ownership follows the org's account rather than an
+individual's or a vendor's. Each linked file must be *Anyone with the link → Viewer* and owned by the
+REPAC account, or it 404s for the public. Small assets that are part of the page itself (logos,
+badges, photos) stay in `images/` — the policy covers documents, not page furniture. The two
+`filesusr.com` PDFs predate this policy and still need moving.
+
 **Rollback layers, strongest lever last:**
 1. Only release an artifact already validated via its preview URL (§4).
 2. `git revert <bad-commit>` → re-release. Deterministic, repo is source of truth. Primary rollback.
