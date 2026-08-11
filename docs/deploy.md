@@ -124,6 +124,13 @@ The deployed headless app is therefore a **fresh rebuild**. Consequences for rol
   **domain reassignment** between two Wix properties + an **SSL re-validation window** (not an instant
   TTL flip — both sites are on Wix). **Keep the legacy Editor site published/undeleted** as the
   rollback lever; do not delete it.
+- **[VERIFIED] The legacy property also hosts live assets the new site links to — a second, separate
+  reason not to delete it.** Two PDFs are served from
+  `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06.filesusr.com/ugd/…` — that host *is* the legacy metaSiteId,
+  i.e. the old Editor site's Media Manager. Deleting the legacy property breaks them even after a
+  successful cutover, when the rollback-lever argument above no longer feels urgent. Either keep the
+  property indefinitely, or re-host the PDFs (repo or the headless project's media) and update the
+  links before retiring it. Retiring the legacy site is therefore **not** a no-op cleanup task.
 - Reassignment is a supported first-class action (Domains → *Assign to a Different Site*). Both
   properties can be Premium at once — that's just two plans (a paid **parity/overlap window** if you
   want A and B both live before committing).
