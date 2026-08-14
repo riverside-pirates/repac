@@ -144,7 +144,7 @@ the preview/release flow, and the cutover/rollback runbook live there and are no
 | History | Founding, incorporation, 501(c)(3) status | Complete — dates need confirmation (§8.2) |
 | Mission | Bulleted list of REPAC activities | Complete |
 | Organization Details | Table: founded, incorporation, IRS status, membership, meetings | Complete — dates need confirmation (§8.2) |
-| Executive Board | Board member names and roles | **PLACEHOLDER** |
+| Executive Board | Officers and committee chairs for the current academic year, plus a fallback contact for reaching a member | Complete — roster is year-stamped and needs refreshing each academic year; two chairs are listed OPEN |
 | Get Involved | Membership info (no dues), CTA to meetings | Complete |
 
 ### 4.3 Engineering Program (`engineering-program.html`)
@@ -203,8 +203,8 @@ the preview/release flow, and the cutover/rollback runbook live there and are no
 | Tax-exempt status? | Complete |
 | How funds are used? | Complete |
 | How to get involved? | Complete |
-| How to donate? | **PLACEHOLDER** |
-| How to contact REPAC? | **PLACEHOLDER** |
+| How to donate? | Complete — points at the Fundraising page rather than restating the methods |
+| How to contact REPAC? | Complete |
 
 ### 4.8 Student Activities (`student-activities.html`)
 | Section | Content | Status |
@@ -243,22 +243,20 @@ the preview/release flow, and the cutover/rollback runbook live there and are no
 
 ## 5. Placeholder Content Inventory
 
-The following items require input from REPAC leadership before the site is content-complete. This
-list is the set of `class="placeholder"` blocks in the HTML; regenerate it with:
+A placeholder is a `class="placeholder"` block: content the page needs but doesn't have, rendered as
+a visibly distinct dashed box (FR-CON-04) so it can't be mistaken for finished copy. The inventory is
+whatever that class currently matches — regenerate it rather than trusting a list:
 
 ```bash
 grep -rn 'class="placeholder"' *.html
 ```
 
-| # | Page | Section | What's Needed |
-|---|---|---|---|
-| 1 | `about.html` | Executive Board | Board member names, roles, optional photos |
-| 2 | `repac-faq.html` | How to donate? | Donation methods and links |
-| 3 | `repac-faq.html` | How to contact? | Email address, social media handles |
+**Currently: none.** The last three — the Executive Board roster on `about.html` and the donate and
+contact answers on `repac-faq.html` — were filled in August 2026.
 
-Items 2 and 3 are answerable from content the site already publishes elsewhere (the Square donation
-link and the REPAC email address on `fundraising.html`); they need leadership confirmation, not new
-facts.
+An empty inventory means no section is *visibly* unfinished. It does not mean the content is
+verified: the facts marked *needs confirmation* in §8.2 are still outstanding, and the board roster
+carries an academic-year stamp that goes stale annually.
 
 ---
 
@@ -391,8 +389,9 @@ needs confirmation before the list is presented as a catalog.
 ## 9. Identified Gaps & Recommendations
 
 ### 9.1 Missing Content (Requires REPAC Leadership Input)
-The placeholder items cataloged in Section 5, plus the facts marked *needs confirmation* in Section
-8.2 and the specialty-course offerings in Section 8.3.
+No placeholder blocks remain (§5). What's still owed is verification rather than drafting: the facts
+marked *needs confirmation* in §8.2, the specialty-course offerings in §8.3, and an annual refresh of
+the year-stamped board roster on `about.html` (two committee chairs are currently listed OPEN).
 
 ### 9.2 Missing Technical Features
 | # | Gap | Recommendation |
@@ -429,12 +428,12 @@ The placeholder items cataloged in Section 5, plus the facts marked *needs confi
 | File | Purpose |
 |---|---|
 | `index.html` | Home page with hero, quick links, resources, mission |
-| `about.html` | Organization history, mission, org details, board (placeholder) |
+| `about.html` | Organization history, mission, org details, executive board roster |
 | `engineering-program.html` | PLTW program overview, course cards, faculty, admission |
 | `course-descriptions.html` | Foundation and specialty course descriptions |
 | `freshman-info.html` | Magnet lottery, freshman expectations, supplies, contacts |
 | `engineering-faq.html` | Engineering program Q&As |
-| `repac-faq.html` | REPAC organization Q&As (2 placeholder) |
+| `repac-faq.html` | REPAC organization Q&As |
 | `repac-documents.html` | Bylaws, handbook, org documents, contact |
 | `student-activities.html` | TSA, robotics, contests, field trips, enrichment programs |
 | `events.html` | Embedded REPAC Google Calendar |
