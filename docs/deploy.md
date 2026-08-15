@@ -179,10 +179,25 @@ badges, photos) stay in `images/` — the policy covers documents, not page furn
 
 Prove GREEN under progressively less privilege, then hand the domain switch to the org.
 
-- **Stage I — deploy to GREEN as OWNER.** While the operator still owns GREEN: `deploy:preview`,
-  validate (§4), `deploy:release`. The build copies from the working tree, so preview from whatever
-  branch has the banner removed — no merge to `main` required, and the draft banner stays on the
-  repo's default branch until launch. *Exit:* a validated, released GREEN. No org involvement.
+- **Stage I — deploy to GREEN as OWNER. ✅ DONE (Aug 2026).** While the operator still owns GREEN:
+  merge the banner removal to `main`, then `deploy:preview` → validate (§4) → `deploy:release`.
+  *Exit:* a validated, released GREEN. No org involvement. Results and gotchas below.
+  **Stage I results.** GREEN is released and serving at
+  `https://riverside-7e51510a-drewshapiro.wix-site-host.com`. All 11 pages, `css/style.css`,
+  `js/main.js` and images return 200; an unknown path returns 404; `/` serves the real homepage, not
+  the 404 route; the draft banner is absent; the board roster is present and no `class="placeholder"`
+  block is served. The live domain still resolves to BLUE (`metaSiteId 9dbcaac9-…`) — a release does
+  not touch the domain.
+
+  Two things to know before validating a future deploy:
+  - **The first request to `/` after a deploy returns 500.** Seen on both the preview and the release,
+    then 10+ consecutive 200s with no intervention — a cold start of the server bundle, not a broken
+    build. Hit it twice before concluding anything is wrong. Sub-pages did not show it.
+  - **The banner removal is merged to `main` now**, so previews no longer need a special branch. The
+    earlier "preview from whatever branch has the banner removed" advice is spent: `main` is the
+    deploy source. What now keeps an unreviewed draft off the public domain is that the domain still
+    points at BLUE, not the banner.
+
 - **Stage II — deploy to GREEN as ADMIN (co-owner).** Prove the untested assumption above. Cheapest
   faithful test is a colleague-sandbox round-trip: transfer GREEN to a trusted colleague → they re-invite
   the operator as co-owner → operator runs `deploy:preview` → colleague transfers GREEN back. The wall is
