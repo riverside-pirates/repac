@@ -44,6 +44,22 @@ permission on a different axis from site access; it is not grantable to an API k
 So the owner runs the privileged steps locally, where an owner session already exists (§3). CI does
 nothing Wix-related; the owner's local `wix build` is the build check.
 
+**What CI does do (`.github/workflows/checks.yml`).** One check, nothing Wix-related — it never
+authenticates, never builds, and cannot deploy. `node scripts/check-links.mjs` walks the root
+`*.html` for `href`/`src` targets and fails with `file:line` if the target file is missing. This is
+the repo's observed bug class: #15 and #24 were both dead references left behind by a renamed or
+deleted page. External URLs are fetched too: a **404/410 fails the build**; timeouts, 403 bot-blocks
+and 5xx print as warnings so a flaky third party can't block an unrelated PR. `SKIP_EXTERNAL=1`
+skips the network. No dependencies, no `npm install` — the script uses only `node:` builtins.
+
+**[VERIFIED] A `wix build` *is* possible in CI, and we still don't do one.** Tested in a clean
+environment (no `~/.wix/auth`, no `.env.local`): the build fails at `astro:config:setup` with
+`Missing environment variable WIX_CLIENT_ID`, but supplying **only** `WIX_CLIENT_ID` (a public OAuth
+identifier, not a secret — `WIX_CLIENT_SECRET` is not needed to build) produces a complete `dist/`
+in ~2s. So the wall above guards `env pull`/`preview`/`release`, **not** `build`. Omitted anyway:
+content PRs can't break the Astro build, and the owner builds locally before every deploy. Recorded
+so the feasibility question isn't re-tested from scratch.
+
 Abandoned approaches, recorded so they aren't reopened:
 - CI `wix login --api-key` + `wix env pull` — dies at the 403 above.
 - Env-injection (`WIX_CLIENT_*` as GitHub secrets, skip `env pull`) — `wix preview` is itself an
