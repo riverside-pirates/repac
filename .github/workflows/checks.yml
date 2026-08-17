@@ -1,0 +1,17 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # No setup-node: ubuntu-latest ships a modern node, and this script uses
+      # only node: builtins. No npm install, no dependencies, no lockfile.
+      - name: Internal links resolve
+        run: node scripts/check-links.mjs
