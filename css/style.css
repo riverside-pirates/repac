@@ -1,15 +1,15 @@
 /* ============================================
    REPAC - Riverside Engineering Parent Action Council
-   Riverside High School Pirates Theme
+   Riverside High School Pirates theme - purple and gold
    ============================================ */
 
 /* ---------- Variables ---------- */
 :root {
-  --pirate-black: #1a1a2e;
+  --pirate-black: #2a1b47;
   --pirate-gold: #d4a017;
   --pirate-gold-light: #f0d060;
-  --pirate-red: #8b0000;
-  --pirate-red-light: #b22222;
+  --pirate-purple: #4b2e83;
+  --pirate-purple-light: #6b46a8;
   --white: #ffffff;
   --gray-50: #f8f9fa;
   --gray-100: #e9ecef;
@@ -34,8 +34,8 @@ body {
   background: var(--white);
 }
 
-a { color: var(--pirate-red); text-decoration: none; }
-a:hover { color: var(--pirate-red-light); text-decoration: underline; }
+a { color: var(--pirate-purple); text-decoration: none; }
+a:hover { color: var(--pirate-purple-light); text-decoration: underline; }
 
 img { max-width: 100%; height: auto; }
 
@@ -154,7 +154,7 @@ h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
 
 /* ---------- Hero ---------- */
 .hero {
-  background: linear-gradient(135deg, var(--pirate-black) 0%, #16213e 100%);
+  background: linear-gradient(135deg, var(--pirate-black) 0%, #3d2569 100%);
   color: var(--white);
   padding: 3rem 0;
   text-align: center;
@@ -201,7 +201,7 @@ h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
 }
 
 .card h3 {
-  color: var(--pirate-red);
+  color: var(--pirate-purple);
   margin-bottom: 0.4rem;
 }
 
@@ -221,8 +221,8 @@ h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
 }
 
 .info-box.highlight {
-  border-left-color: var(--pirate-red);
-  background: #fff5f5;
+  border-left-color: var(--pirate-purple);
+  background: #f7f4fc;
 }
 
 /* ---------- Section ---------- */
@@ -249,7 +249,7 @@ h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
 }
 
 .resource-list a {
-  color: var(--pirate-red);
+  color: var(--pirate-purple);
   text-decoration: underline;
 }
 
@@ -404,12 +404,12 @@ tr:hover { background: var(--gray-50); }
 }
 
 .btn-secondary {
-  background: var(--pirate-red);
+  background: var(--pirate-purple);
   color: var(--white);
 }
 
 .btn-secondary:hover {
-  background: var(--pirate-red-light);
+  background: var(--pirate-purple-light);
   color: var(--white);
 }
 
