@@ -214,11 +214,18 @@ Prove GREEN under progressively less privilege, then hand the domain switch to t
     deploy source. What now keeps an unreviewed draft off the public domain is that the domain still
     points at BLUE, not the banner.
 
-- **Stage II — deploy to GREEN as ADMIN (co-owner).** Prove the untested assumption above. Cheapest
-  faithful test is a colleague-sandbox round-trip: transfer GREEN to a trusted colleague → they re-invite
-  the operator as co-owner → operator runs `deploy:preview` → colleague transfers GREEN back. The wall is
-  role-based on the project, so a colleague-owner is a faithful proxy for the org owner. *Exit:*
-  "who deploys" settled before any org handoff, with no production account touched.
+- **Stage II — deploy to GREEN as ADMIN (co-owner). ✅ DONE (Aug 2026).** Ran the colleague-sandbox
+  round-trip: GREEN transferred to a trusted colleague, operator re-invited as co-owner, then
+  `wix env pull`, `deploy:preview` and `deploy:release` **all succeeded from the co-owner role**.
+
+  **This settles "who deploys."** A co-owner needs no ownership: `env pull` is the command that 403s
+  for an API key (§2), and it works for a human collaborator. So the §2 wall is about *API keys*, not
+  about *ownership* — the distinction the whole handoff model rests on. Release works too, not just
+  preview, so the org does not have to route deploys through whoever happens to hold the account.
+
+  Not captured during the test, and worth noting next time: whether the pulled `.env.local` matched
+  the pre-transfer copy, the new preview/release host (the `…-drewshapiro…` segment encodes the owner
+  account and should change under another), and whether the cold-start 500 recurred.
 - **Stage III — transfer GREEN into the org's account for the domain switch.** Only after I and II
   pass. Then the org's officers reassign the domain BLUE→GREEN at their discretion — a subdomain
   (`beta.repac-riverside.org`) first, then the apex — with rollback = reassign back to BLUE.
@@ -228,7 +235,8 @@ Prove GREEN under progressively less privilege, then hand the domain switch to t
 
 Deploy auth is a local owner `wix login` session, not a stored key, so handoff is: the new owner logs
 in as themselves, runs `wix env pull` for their own `.env.local` (§3), and runs the `deploy:*` scripts.
-There is no CI secret to rotate. They need owner or co-owner rights on the headless project. Note the
+There is no CI secret to rotate. They need owner or co-owner rights on the headless project —
+**co-owner is [VERIFIED] sufficient for `env pull`, `preview` and `release`** (Stage II, §5). Note the
 preview URL host encodes the owner account (`…-drewshapiro.wix-site-host.com`) and will change under
 theirs.
 
