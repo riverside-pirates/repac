@@ -72,7 +72,23 @@ Abandoned approaches, recorded so they aren't reopened:
 - **`wix login`** (browser) writes an OAuth session to `~/.wix/auth` (~4h + refresh token). This
   owner session is what clears the §2 wall, so it is what authorizes preview and release.
 - **`wix whoami`** fronts both deploy scripts as a fail-fast check — a dead session aborts in ~4s,
-  before the build. If a script stops there, re-run `npx wix login`.
+  before the build. If a script stops there, re-run `npx wix login`. It is a **liveness check, not an
+  identity check**: it prints whichever account is logged in and the scripts proceed regardless, so
+  read the email it prints. A session for an account without rights on GREEN gets through `whoami`
+  and fails later, at `preview`/`release`.
+- **Switching accounts** (`~/.wix/auth` holds one session at a time — logging in replaces it):
+
+  ```bash
+  cd wix-host
+  npx wix logout
+  npx wix login            # browser; sign in as the intended account
+  npx wix whoami           # confirm the email before deploying
+  npx wix env pull         # refresh .env.local under the new identity (overwrites it)
+  ```
+
+  Needed whenever the deploying account changes — including the personal → `rhsfabtab@gmail.com`
+  switch at Stage III (§5). Re-pull rather than reusing the old `.env.local`: it is the project's
+  OAuth identity, and a stale one is the confusing failure mode here.
 - **`.env.local`** (`WIX_CLIENT_ID` / `_SECRET` / `_PUBLIC_KEY` / `_INSTANCE_ID` / `WIX_CLOUD_PROVIDER`)
   is the headless OAuth app's identity, read by the build. It is gitignored, so it **does not travel
   with git**: every checkout and every deployer needs their own via
