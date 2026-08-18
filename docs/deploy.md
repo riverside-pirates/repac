@@ -124,11 +124,11 @@ accounts — that, not permissions, is what blocks cutover:
 
 ```mermaid
 flowchart LR
-  subgraph ORG["Org owner's Wix account"]
+  subgraph ORG["repacrhs@gmail.com · REPAC org account (target owner)"]
     DOM(["repac-riverside.org"])
     BLUE["BLUE · legacy Editor site<br/>metaSiteId 9dbcaac9…"]
   end
-  subgraph OP["Operator's Wix account"]
+  subgraph OP["drew.shapiro@gmail.com · personal (to be vacated)"]
     GREEN["GREEN · headless project<br/>siteId 9830980c…"]
   end
 
@@ -136,6 +136,22 @@ flowchart LR
   GREEN -.->|"Stage III · transfer the site<br/>into the org account"| ORG
   DOM -.->|"cutover — possible only once<br/>both sit in one account<br/>(rollback = reverse this)"| GREEN
 ```
+
+**Account model (decided Aug 2026).** No personal accounts in the end state:
+
+| Account | Role | Holds |
+|---|---|---|
+| `repacrhs@gmail.com` | **Owner** | Domain, BLUE, and GREEN after Stage III |
+| `rhsfabtab@gmail.com` | **Admin / co-owner** | Deploy rights on GREEN — no ownership needed (Stage II) |
+| `drew.shapiro@gmail.com` | *transitional* | Currently owns GREEN; vacates at Stage III |
+
+Two accounts rather than one so a single lost password isn't a lockout, and because Stage II proved a
+co-owner can run the full `env pull` → `preview` → `release` path without owning anything. Same account
+as the document-hosting policy below, so the site's owner and its linked documents stay together.
+
+**[VERIFY] before Stage III:** confirm `repacrhs@gmail.com` actually owns BLUE *and* the domain today.
+The diagram assumes it; if either sits in a personal account, that is a prerequisite transfer and the
+account consolidation is two moves, not one.
 
 Confirm BLUE from the live domain itself:
 `curl -s https://www.repac-riverside.org/ | grep -o '"metaSiteId":"[^"]*"' | head -1` → `9dbcaac9-…`.
@@ -226,10 +242,12 @@ Prove GREEN under progressively less privilege, then hand the domain switch to t
   Not captured during the test, and worth noting next time: whether the pulled `.env.local` matched
   the pre-transfer copy, the new preview/release host (the `…-drewshapiro…` segment encodes the owner
   account and should change under another), and whether the cold-start 500 recurred.
-- **Stage III — transfer GREEN into the org's account for the domain switch.** Only after I and II
-  pass. Then the org's officers reassign the domain BLUE→GREEN at their discretion — a subdomain
+- **Stage III — transfer GREEN into `repacrhs@gmail.com` for the domain switch.** Only after I and II
+  pass. Transfer GREEN out of the personal account, invite `rhsfabtab@gmail.com` as admin/co-owner for
+  deploys, then the org's officers reassign the domain BLUE→GREEN at their discretion — a subdomain
   (`beta.repac-riverside.org`) first, then the apex — with rollback = reassign back to BLUE.
-  **Keep the legacy Editor site published and undeleted.** *Exit:* cutover owned by the org.
+  **Keep the legacy Editor site published and undeleted.** *Exit:* cutover owned by the org, no
+  personal account in the path.
 
 ## 6. Ownership transfer / client handoff
 
