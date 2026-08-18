@@ -140,7 +140,7 @@ accounts — that, not permissions, is what blocks cutover:
 
 ```mermaid
 flowchart LR
-  subgraph ORG["repacrhs@gmail.com · REPAC org account (target owner)"]
+  subgraph ORG["REPACrhs@gmail.com · REPAC org account (target owner)"]
     DOM(["repac-riverside.org"])
     BLUE["BLUE · legacy Editor site<br/>metaSiteId 9dbcaac9…"]
   end
@@ -157,7 +157,7 @@ flowchart LR
 
 | Account | Role | Holds |
 |---|---|---|
-| `repacrhs@gmail.com` | **Owner** | Domain, BLUE, and GREEN after Stage III |
+| `REPACrhs@gmail.com` | **Owner** | Domain, BLUE, and GREEN after Stage III |
 | `rhsfabtab@gmail.com` | **Admin / co-owner** | Deploy rights on GREEN — no ownership needed (Stage II) |
 | `drew.shapiro@gmail.com` | *transitional* | Currently owns GREEN; vacates at Stage III |
 
@@ -165,9 +165,10 @@ Two accounts rather than one so a single lost password isn't a lockout, and beca
 co-owner can run the full `env pull` → `preview` → `release` path without owning anything. Same account
 as the document-hosting policy below, so the site's owner and its linked documents stay together.
 
-**[VERIFY] before Stage III:** confirm `repacrhs@gmail.com` actually owns BLUE *and* the domain today.
-The diagram assumes it; if either sits in a personal account, that is a prerequisite transfer and the
-account consolidation is two moves, not one.
+**✅ [VERIFIED] Aug 2026:** `REPACrhs@gmail.com` already owns BLUE **and** the domain, so consolidation
+is a single move — transfer GREEN in, and both properties sit in one account with the domain. Both
+`REPACrhs@gmail.com` and `rhsfabtab@gmail.com` have been invited to GREEN. What remains for Stage III
+is the ownership transfer itself and the domain reassignment.
 
 Confirm BLUE from the live domain itself:
 `curl -s https://www.repac-riverside.org/ | grep -o '"metaSiteId":"[^"]*"' | head -1` → `9dbcaac9-…`.
@@ -258,7 +259,7 @@ Prove GREEN under progressively less privilege, then hand the domain switch to t
   Not captured during the test, and worth noting next time: whether the pulled `.env.local` matched
   the pre-transfer copy, the new preview/release host (the `…-drewshapiro…` segment encodes the owner
   account and should change under another), and whether the cold-start 500 recurred.
-- **Stage III — transfer GREEN into `repacrhs@gmail.com` for the domain switch.** Only after I and II
+- **Stage III — transfer GREEN into `REPACrhs@gmail.com` for the domain switch.** Only after I and II
   pass. Transfer GREEN out of the personal account, invite `rhsfabtab@gmail.com` as admin/co-owner for
   deploys, then the org's officers reassign the domain BLUE→GREEN at their discretion — a subdomain
   (`beta.repac-riverside.org`) first, then the apex — with rollback = reassign back to BLUE.
