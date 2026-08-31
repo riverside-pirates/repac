@@ -534,3 +534,63 @@ tr:hover { background: var(--gray-50); }
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Skip to Content Link ---------- */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--pirate-black);
+  color: var(--pirate-gold);
+  padding: 8px 12px;
+  text-decoration: none;
+  z-index: 1000;
+  border-radius: 0 0 4px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 2px solid var(--pirate-gold);
+  outline-offset: 2px;
+}
+
+/* ---------- Print Styles ---------- */
+@media print {
+  .site-header,
+  .site-footer,
+  .nav-toggle,
+  .skip-to-content {
+    display: none;
+  }
+
+  .page-content {
+    padding: 0;
+  }
+
+  .container {
+    max-width: 100%;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  .faq-answer {
+    display: block !important;
+  }
+
+  .faq-question::after {
+    display: none;
+  }
+
+  table {
+    page-break-inside: avoid;
+  }
+
+  a {
+    color: var(--pirate-black);
+    text-decoration: underline;
+  }
+}
