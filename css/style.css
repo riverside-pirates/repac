@@ -225,6 +225,23 @@ h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
   background: #f7f4fc;
 }
 
+/* ---------- Student Spotlight ---------- */
+.student-spotlight {
+  margin: 1.5rem 0;
+}
+
+.student-spotlight-placeholder {
+  background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+  border: 2px dashed var(--gray-300);
+  border-radius: 8px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ---------- Section ---------- */
 .section {
   margin-bottom: 2rem;
