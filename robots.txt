@@ -1,0 +1,8 @@
+# REPAC - Riverside Engineering Parent Action Council
+# Allow all crawlers to index the entire site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.repac-riverside.org/sitemap.xml
