@@ -1,81 +1,81 @@
-# REPAC - Riverside Engineering Parent Action Council
+# REPAC website — Riverside Engineering Parent Action Council
 
-Rebuild of the REPAC organization website, supporting the PLTW engineering program at Riverside High School in Durham, NC.
+The website of REPAC, the 501(c)(3) parent organization that supports the Project Lead The Way (PLTW)
+engineering program at Riverside High School in Durham, NC.
 
-## About
+**Live at <https://www.repac-riverside.org>.** This repository is the source of the live site.
 
-REPAC is a 501(c)(3) nonprofit organization founded in 2008 that supports the Project Lead The Way (PLTW) pre-engineering faculty and students at Riverside High School.
+## Status (checked 2026-11-17)
 
-## Status: intended vs. actual
+| | |
+|---|---|
+| **Live site** | www.repac-riverside.org serves this repo, deployed through Wix-Managed Headless. |
+| **What's live** | Whatever was last *released*, not whatever is on `main`. Merging does not publish; an account owner releases by hand (see `docs/deploy.md`). On 2026-11-17 the live site matched `main` except `about.html`, which was a few commits behind. |
+| **Old site** | The previous Wix Editor site still exists in REPAC's Wix account but no longer serves the domain. Keep it: it's the rollback target and still hosts two PDFs that `repac-documents.html` links to (#69). |
+| **Known live problems** | Old Wix page addresses (`/repac`, `/engineering-program`, …) now return 404, and search setup is incomplete. See the top of `TODO.md`. |
 
-**This repo is not the live site yet.** Read this section before anything else.
+## Making a change
 
-| | Intended (end state) | Actual (today) |
-|---|---|---|
-| **Public site** | This repo, served at `www.repac-riverside.org` | Legacy Wix site at `www.repac-riverside.org`, edited in the Wix visual editor. Not in this repo. |
-| **Wix site type** | Headless project (Wix-Managed Headless) — Wix hosts our Astro app in `wix-host/` | Classic **Wix Editor** site (verified: Thunderbolt viewer, `editorType:""`, `isResponsive:false`) |
-| **Source of truth** | This repo | The legacy Wix site. This repo is a not-yet-launched replacement. |
-| **Hosting** | Wix-Managed Headless, released locally by an owner (no CI — see `docs/deploy.md`) | Nothing. The site runs only on a local `python3 -m http.server`. No hosting, no domain pointed here. |
-| **Pages** | Consolidated IA (see `SITE_ANALYSIS.md`) | The pages listed under *Site Structure* below, content-incomplete |
-| **Content** | Reviewed and approved by REPAC leadership | Unreviewed. Drafted from the legacy site plus inference; some facts unverified. |
+The site is plain HTML, CSS and JavaScript with no build step. To change a page, edit its `.html`
+file directly.
 
-The red **UNOFFICIAL DRAFT** banner that `js/main.js` used to inject on every page has been removed in preparation for launch. Nothing else marks these pages as a draft, so the table above — not anything visible on the page — is what tells you whether this is live yet.
+1. **Facts need a source.** Names, dates, numbers and policies on the site must match `OPENSPEC.md`
+   §8.2, which records where each fact was checked. If you can't verify something, don't publish it;
+   add it to "Waiting on REPAC leadership" in `TODO.md`.
+2. **The header and footer are copied into all 11 pages.** A change to the menu or footer has to be
+   made in every `.html` file. This one-liner should print a single line with the count 11:
 
-## What stands between here and launch
+   ```bash
+   for f in *.html; do awk '/<header class="site-header">/,/<\/header>/' "$f" | md5sum; done | sort | uniq -c
+   ```
+3. **Check links before opening a pull request.** CI runs the same check on every PR:
 
-Two independent tracks. Neither blocks the other.
+   ```bash
+   node scripts/check-links.mjs                    # internal and external links
+   SKIP_EXTERNAL=1 node scripts/check-links.mjs    # offline: internal links only
+   ```
+4. **Documents (PDFs, minutes, forms) go in the REPAC Google Drive**, not this repo. Link to them
+   with sharing set to "Anyone with the link → Viewer". Images that are part of a page go in
+   `images/`.
 
-**1. Content and facts** — the larger track, and the one that needs people, not code. Faculty bios and photos, executive board roster, verified founding/incorporation dates, correct faculty roles, the PLTW courses not yet described, sponsor logos, and outbound links (DPS CTE lottery, Google Group, calendar iCal). The authoritative list is `TODO.md` plus the repo issues.
+To preview locally, open `index.html` in a browser, or run `python3 -m http.server 8000` and visit
+<http://localhost:8000>.
 
-Some sections ship a visible placeholder block instead of real content. To find every one still outstanding:
+## What's in the repo
 
-```bash
-grep -rn 'class="placeholder"' *.html
 ```
-
-**2. Deployment** — engineering. The decision is locked: Wix-Managed Headless, because Wix is load-bearing for the org and moving off it is a separate fight. The shape is an Astro wrapper in `wix-host/` that serves these static files from `public/`. Preview and release are **run locally by an account owner** (`npm run deploy:preview` / `deploy:release` in `wix-host/`) — **not** CI-driven: Wix's privileged CLI steps require an owner session that an API key can't hold, so there is no deploy workflow.
-
-This is a move between two different [types of Wix site](https://dev.wix.com/docs/overview/platform-overview/types-of-wix-sites): a Wix Editor site today, a headless project after launch. Two consequences worth stating up front. Nothing migrates — Wix cannot carry an Editor site's pages or data into a headless project, so this repo is a rebuild, not an import. And because both old and new live on Wix, cutover and rollback are a **domain reassignment inside Wix**, with an SSL re-validation window — not a DNS TTL flip. Keep the old Editor site published and undeleted until well after launch; it is the rollback target.
-
-**The canonical deployment reference is [`docs/deploy.md`](docs/deploy.md)** — why there's no CI (the owner-permission wall), the local owner-run preview/release flow, auth, and the cutover/rollback runbook. The questions that were open when this plan was approved (non-interactive `wix release` in CI, API-key permission scope, `public/` vs `src/pages` routing) are resolved there.
-
-## Site Structure
-
-Plain HTML/CSS/JS static site — no build tools or dependencies.
-
-```
-index.html                  Home page
-about.html                  About REPAC (history, mission, board)
-engineering-program.html    PLTW program overview
+index.html                  Home
+about.html                  About REPAC: history, mission, organization details, executive board
+engineering-program.html    PLTW program overview, faculty, admission
 course-descriptions.html    PLTW course details
-freshman-info.html          Info for incoming freshmen
+freshman-info.html          Information for incoming freshmen
 engineering-faq.html        Engineering program FAQ
 repac-faq.html              REPAC organization FAQ
-repac-documents.html        Bylaws, minutes, org documents
-student-activities.html     TSA, clubs, community service
-events.html                 Events calendar
-fundraising.html            Spirit wear, fundraising
-css/style.css               Shared stylesheet
-js/main.js                  Shared JS (nav toggle, FAQ accordion, calendar loading)
-images/                     Image assets
+repac-documents.html        Bylaws and other REPAC documents (linked from Home > Resources)
+student-activities.html     TSA, robotics, contests, field trips, enrichment programs
+events.html                 Embedded REPAC Google Calendar
+fundraising.html            Spirit wear, donations, sponsorship
+css/style.css               The one stylesheet
+js/main.js                  The one script: mobile menu, FAQ accordion, calendar loading
+images/                     Images used on pages
+scripts/check-links.mjs     Link checker (run by CI)
+wix-host/                   Thin Astro wrapper Wix needs to host the site (see docs/deploy.md)
 ```
 
-Not everything the org runs lives here: spirit wear is a separate Square storefront, and the events calendar is Google Calendar. Those stay external.
+Some things REPAC runs live elsewhere and stay there: spirit wear is a Square storefront and the
+events calendar is a Google Calendar.
 
-## Local Development
+## Which document to read
 
-Open `index.html` in a browser. No build step required.
+| Document | Use it for |
+|---|---|
+| `README.md` | This overview |
+| `OPENSPEC.md` | Requirements for every page, and the verified list of organizational facts (§8.2) |
+| `TODO.md` | The backlog, and questions waiting on REPAC leadership |
+| `docs/deploy.md` | How the site is built, previewed and released, and how to roll back |
+| `AGENTS.md` | Rules for AI coding agents working in this repo (also a good checklist for people) |
+| `SITE_ANALYSIS.md` | April 2026 audit of the old Wix site. Historical: explains *why* the site is organized the way it is |
+| [GitHub issues](https://github.com/riverside-pirates/repac/issues) | The live worklist. Where an issue and `TODO.md` disagree, the issue is newer |
 
-For a local dev server:
-
-```bash
-python3 -m http.server 8000
-# then visit http://localhost:8000
-```
-
-## Where the rest of the context lives
-
-- `SITE_ANALYSIS.md` — audit of the legacy Wix site and the rationale for consolidating it. Start here to understand *why* the new IA looks like it does.
-- `TODO.md` — pre-launch / post-launch / technical backlog. Overlaps the issues below; where they disagree, the issues are newer.
-- [GitHub issues](https://github.com/riverside-pirates/repac/issues) — the live worklist.
-- `OPENSPEC.md` — the requirements spec of record: sitemap, per-page content requirements, functional and non-functional requirements. The intent is that this doc becomes the source these README-level docs summarize.
+If two documents disagree, trust them in this order: the live site and outside sources, then
+`OPENSPEC.md` §8.2 for facts, `docs/deploy.md` for deployment, then everything else.

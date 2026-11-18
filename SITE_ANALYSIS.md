@@ -1,5 +1,10 @@
 # REPAC-Riverside.org Site Analysis
 
+> **Historical document (April 2026).** This audits the *old* Wix site before the rebuild and is not
+> kept up to date. Facts below are as the old site stated them in April 2026; current, verified facts
+> are in `OPENSPEC.md` §8.2. The old site's pages no longer exist at these addresses: since the
+> cutover (between August and November 2026) the links in the table below return 404 (see `TODO.md`).
+
 ## Fact Sheet
 
 ### What It Is
@@ -23,12 +28,12 @@
 
 ### The Engineering Program It Supports
 
-- PLTW-accredited, **Distinguished School** recognition 4 years running
+- PLTW-accredited, **Distinguished School** recognition 4 years running (as the old site said; DPS reported a 9th consecutive year in 2026)
 - 96% of engineering students go on to attend college
 - 3 foundation courses (grades 9-11) + specialty courses (cybersecurity, digital electronics, aerospace, civil engineering & architecture)
 - Students can earn college credit with a B grade + passing score on national PLTW exam
 
-### Current Site Structure (16 pages on Wix)
+### Old Site Structure (16 pages on Wix, April 2026)
 
 | Page | Purpose |
 |------|---------|
@@ -131,5 +136,5 @@ As a parent-facing site, the majority of traffic is likely from phones. The rebu
 - [REPAC FAQ](https://www.repac-riverside.org/repac-faq)
 - [Engineering FAQ](https://www.repac-riverside.org/engineering-faq)
 - [Fundraising](https://www.repac-riverside.org/fundraising)
-- [Durham Public Schools - PLTW](https://www.dpsnc.net/Page/2042)
+- Durham Public Schools - PLTW (`dpsnc.net/Page/2042`, now removed by DPS; the closest current page is [DPS CTE Pathways](https://welcome.dpsnc.net/cte-pathways/))
 - [Duke Engineering - Riverside Outreach](https://pratt.duke.edu/news/riverside-high-school-outreach/)
