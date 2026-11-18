@@ -33,19 +33,19 @@
   <url>
     <loc>https://www.repac-riverside.org/engineering-faq.html</loc>
     <lastmod>2026-05-04</lastmod>
-    <changefreq>quarterly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.repac-riverside.org/repac-faq.html</loc>
     <lastmod>2026-05-04</lastmod>
-    <changefreq>quarterly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.repac-riverside.org/student-activities.html</loc>
     <lastmod>2026-05-04</lastmod>
-    <changefreq>quarterly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
@@ -57,7 +57,13 @@
   <url>
     <loc>https://www.repac-riverside.org/fundraising.html</loc>
     <lastmod>2026-05-04</lastmod>
-    <changefreq>quarterly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.repac-riverside.org/repac-documents.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
