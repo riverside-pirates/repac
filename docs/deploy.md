@@ -3,6 +3,9 @@
 Canonical reference for deploying the REPAC static site. **The human is the executor:** preview and
 release are local commands run by an account owner. There is no CI that talks to Wix (§2).
 
+> **Status (checked 2026-11-17): live.** www.repac-riverside.org serves GREEN, the headless project
+> this repo deploys to (§5). A release now goes straight to the public site.
+
 ## 1. Architecture
 
 The site is plain static HTML (`*.html`, `css/`, `js/`, `images/` at the repo root). Wix-Managed
@@ -107,15 +110,16 @@ npm run deploy:preview   # whoami -> build -> wix preview   (ephemeral URL; safe
 npm run deploy:release   # whoami -> build -> wix release   (deliberate, owner-run)
 ```
 
-Owner go-ahead for release was granted Aug 2026. There is no `wix rollback` command, and a release
-does **not** reassign the live domain — that is the separate cutover in §5. Two useful properties from
+Since cutover (§5), **a release publishes to www.repac-riverside.org immediately.** There is no
+`wix rollback` command. Before releasing, make sure you're building what's on `main` and nothing else:
+`git status` should be clean, and `git pull` should report you're up to date with `origin/main`.
+The scripts don't check this for you. Two useful properties from
 Wix's [Build and Deploy a Headless Project](https://dev.wix.com/docs/go-headless/wix-managed-headless/full-integration-astro/development/build-and-deploy-with-the-cli):
 each preview URL is pinned to its own version and later pushes don't alter it, and `wix release`
 clears the whole site cache — if stale content survives a deploy, release again.
 
-Validate a preview before any release or cutover — open the ephemeral URL and confirm `/` renders the
-real homepage (not the 404 route), that the UNOFFICIAL DRAFT banner is absent, and that a bogus path
-serves the 404 page. Quick automated pass:
+Validate a preview before every release — open the ephemeral URL and confirm `/` renders the real
+homepage (not the 404 route) and that a bogus path serves the 404 page. Quick automated pass:
 
 ```bash
 BASE="https://<preview-host>.wix-site-host.com"   # from the deploy:preview output
@@ -124,34 +128,38 @@ for p in / about.html engineering-program.html events.html repac-faq.html css/st
 done            # expect 200 for every line
 ```
 
-## 5. Cutover and rollback — deferred
+## 5. Cutover and rollback
 
-The live site and the headless project are two separate Wix properties — **BLUE** is what serves
-traffic today, **GREEN** is the replacement being proven. **Identify them by ID, never by console
-display name** (names are editable and easy to confuse):
+**Cutover is done.** As of 2026-11-17 the domain serves GREEN: `http://repac-riverside.org`
+redirects to `https://www.repac-riverside.org/`, which serves this repo's pages, and the site's 404
+page reports GREEN's ID. The date of the switch wasn't recorded. The rest of this section is kept
+because it's the rollback runbook and explains how the switch works.
+
+The old site and the headless project are two separate Wix properties — **BLUE** is the legacy Editor
+site, **GREEN** is the headless project that now serves the domain. **Identify them by ID, never by
+console display name** (names are editable and easy to confuse):
 
 | | Property | Fixed ID | Role |
 |---|---|---|---|
-| **BLUE** | Legacy Wix Editor site | metaSiteId `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06` | Live now; **keep** = rollback target |
-| **GREEN** | Headless project | siteId `9830980c-d83c-48fd-aa0c-d67c909406bd` | Deploy target (= `wix.config.json`) |
+| **BLUE** | Legacy Wix Editor site | metaSiteId `9dbcaac9-3336-4ec2-8c8f-4a4f275aad06` | Served the domain until cutover; **keep** = rollback target |
+| **GREEN** | Headless project | siteId `9830980c-d83c-48fd-aa0c-d67c909406bd` | **Serves the domain now**; deploy target (= `wix.config.json`) |
 
-Domain reassignment is a **within-account** operation, and today the two properties live in different
-accounts — that, not permissions, is what blocks cutover:
+Domain reassignment is a **within-account** operation: a domain can only be pointed at a site in the
+same Wix account. Before cutover, BLUE and the domain were in the REPAC account and GREEN was in a
+personal account, which is why Stage III below planned a transfer.
 
 ```mermaid
 flowchart LR
-  subgraph ORG["REPACrhs@gmail.com · REPAC org account (target owner)"]
-    DOM(["repac-riverside.org"])
-    BLUE["BLUE · legacy Editor site<br/>metaSiteId 9dbcaac9…"]
-  end
-  subgraph OP["drew.shapiro@gmail.com · personal (to be vacated)"]
-    GREEN["GREEN · headless project<br/>siteId 9830980c…"]
-  end
-
-  DOM ==>|"live today"| BLUE
-  GREEN -.->|"Stage III · transfer the site<br/>into the org account"| ORG
-  DOM -.->|"cutover — possible only once<br/>both sit in one account<br/>(rollback = reverse this)"| GREEN
+  DOM(["repac-riverside.org"])
+  GREEN["GREEN · headless project<br/>siteId 9830980c…"]
+  BLUE["BLUE · legacy Editor site<br/>metaSiteId 9dbcaac9…"]
+  DOM ==>|"live since cutover"| GREEN
+  DOM -.->|"rollback = reassign back"| BLUE
 ```
+
+**Not recorded: which account owns GREEN now.** Because the domain serves GREEN, GREEN and the domain
+must share an account. The decided end state is `REPACrhs@gmail.com` (below); confirm it in the Wix
+dashboard and record it here.
 
 **Account model (decided Aug 2026).** No personal accounts in the end state:
 
@@ -170,8 +178,9 @@ is a single move — transfer GREEN in, and both properties sit in one account w
 `REPACrhs@gmail.com` and `rhsfabtab@gmail.com` have been invited to GREEN. What remains for Stage III
 is the ownership transfer itself and the domain reassignment.
 
-Confirm BLUE from the live domain itself:
-`curl -s https://www.repac-riverside.org/ | grep -o '"metaSiteId":"[^"]*"' | head -1` → `9dbcaac9-…`.
+Confirm which property serves the domain from the 404 page (rendered by `wix-host/src/pages/404.astro`):
+`curl -s https://www.repac-riverside.org/no-such-page | grep -o 'getMetaSiteId: () => "[^"]*"'` →
+`9830980c-…` means GREEN. BLUE's pages instead contain `"metaSiteId":"9dbcaac9-…"`.
 Any site that is neither of these is unrelated — do not touch it.
 
 Wix cannot convert an Editor site to headless in place or migrate its data, so go-live is a
@@ -202,13 +211,16 @@ badges, photos) stay in `images/` — the policy covers documents, not page furn
 4. Reassign the domain back to BLUE. A domain maps to one property at a time; both can be Premium at
    once. This is a within-Wix reassignment with an SSL re-validation window, not a DNS TTL flip.
 
-### Prerequisites
+### Prerequisites (as planned before cutover)
 
-- **[BLOCKER] Consolidate BLUE, the domain, and GREEN into the org owner's account.** Wix scopes
+These were the preconditions for the switch. The switch has happened, so the blocker below was
+cleared somehow; how is not recorded (see "Not recorded" above).
+
+- **[BLOCKER — cleared] Consolidate BLUE, the domain, and GREEN into the org owner's account.** Wix scopes
   reassignment to the account: *"Assign any domain **in your Wix account** to your site"*
   ([Assigning a Domain to a Site](https://support.wix.com/en/article/assigning-a-domain-to-a-site-in-your-wix-account)).
-  Today the domain and BLUE are in the org owner's account and GREEN is in the operator's, so the swap
-  cannot be done as-is. Direction: bring **GREEN to the org**
+  Before cutover the domain and BLUE were in the org owner's account and GREEN was in the operator's,
+  so the swap couldn't be done as-is. Direction: bring **GREEN to the org**
   ([Transferring a Premium Site to Another Wix Account](https://support.wix.com/en/article/transferring-a-premium-site-to-another-wix-account)),
   not BLUE to the operator — the org keeps ownership of its web presence. The transfer form has
   separate opt-in checkboxes for the site plan and the domain, the recipient needs an existing Wix
@@ -216,7 +228,7 @@ badges, photos) stay in `images/` — the policy covers documents, not page furn
   ([Accepting Transferred Site Ownership](https://support.wix.com/en/article/accepting-transferred-site-ownership)),
   so coordinate it live rather than emailing and waiting. The metaSite id is stable across account
   moves, so the repo keeps deploying to the same GREEN.
-- **[VERIFY] Does co-owner/admin suffice for `release`/`preview`?** Wix documents that a collaborator
+- **[VERIFIED in Stage II] Does co-owner/admin suffice for `release`/`preview`?** Wix documents that a collaborator
   added to the project can `wix env pull` and "build, preview, and release it with the Wix CLI, just
   like you can" ([Invite Collaborators](https://dev.wix.com/docs/go-headless/project-management/invite-collaborators)) —
   so this is expected to work. Our 403 (§2) was an API key, not a human collaborator. Stage II
@@ -244,8 +256,8 @@ Prove GREEN under progressively less privilege, then hand the domain switch to t
     build. Hit it twice before concluding anything is wrong. Sub-pages did not show it.
   - **The banner removal is merged to `main` now**, so previews no longer need a special branch. The
     earlier "preview from whatever branch has the banner removed" advice is spent: `main` is the
-    deploy source. What now keeps an unreviewed draft off the public domain is that the domain still
-    points at BLUE, not the banner.
+    deploy source. Since cutover, the only thing between `main` and the public site is the owner's
+    release step (§4).
 
 - **Stage II — deploy to GREEN as ADMIN (co-owner). ✅ DONE (Aug 2026).** Ran the colleague-sandbox
   round-trip: GREEN transferred to a trusted colleague, operator re-invited as co-owner, then
@@ -265,6 +277,21 @@ Prove GREEN under progressively less privilege, then hand the domain switch to t
   (`beta.repac-riverside.org`) first, then the apex — with rollback = reassign back to BLUE.
   **Keep the legacy Editor site published and undeleted.** *Exit:* cutover owned by the org, no
   personal account in the path.
+  **Result: the domain switch is done** (apex and `www` both reach GREEN, observed 2026-11-17).
+  Not recorded: whether a `beta.` subdomain was used first, when the switch happened, and whether
+  ownership moved to `REPACrhs@gmail.com` as planned. Confirm and fill in.
+
+### Since cutover
+
+Seen on the live site on 2026-11-17; tracked at the top of `TODO.md`:
+- **Old Wix addresses 404.** All 15 legacy paths (`/repac`, `/engineering-program`, …) return 404,
+  so bookmarks, search results and inbound links to the old pages are broken. They need redirects.
+- **The cold-start 500 happens in production too.** One request to `/` in about 50 returned 500, not
+  right after a deploy. Every retry succeeded.
+- **Search setup is incomplete.** `robots.txt` is Wix's auto-generated file and points at
+  `/sitemap.xml`, which returns 404; `/favicon.ico` is Wix's blank placeholder. Files added to the repo
+  root won't fix this on their own, because `sync-static.mjs` only copies `*.html`, `css/`, `js/` and
+  `images/`.
 
 ## 6. Ownership transfer / client handoff
 
