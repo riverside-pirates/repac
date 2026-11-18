@@ -2,25 +2,33 @@
 ## REPAC - Riverside Engineering Parent Action Council Website
 ### repac-riverside.org
 
-**Version:** 1.0
-**Date:** 2026-03-09
+**Version:** 1.2
+**Date:** 2026-11-17
 **Status:** Requirements spec of record — the intended source for the README-level docs.
-Sections below are as of 2026-03-09 and have drifted; reconciling them is a separate pass. Until
-then, `README.md` and `docs/deploy.md` describe actual state.
+Reconciled against the repository on 2026-08-11 and against the live site and outside sources on
+2026-11-17. The site is live at www.repac-riverside.org (see `README.md`).
+
+**Facts policy.** §8.2 is the single list of organizational facts. Each fact says how it was
+verified (IRS record, DPS page, REPAC leadership) or that it *needs confirmation*. A fact that needs
+confirmation is tracked in `TODO.md` under "Waiting on REPAC leadership" and the `blocked:
+needs-facts` issue label. Don't add a fact to a page unless it can go in §8.2 with a source.
 
 ---
 
 ## 1. Project Overview
 
 ### 1.1 Organization
-REPAC (Riverside Engineering Parent Action Council) is a 501(c)(3) nonprofit organization founded in February 2008. It supports the Project Lead The Way (PLTW) pre-engineering program at Riverside High School in Durham, NC.
+REPAC (Riverside Engineering Parent Action Council) is a 501(c)(3) nonprofit organization supporting
+the Project Lead The Way (PLTW) pre-engineering program at Riverside High School in Durham, NC.
+Its 501(c)(3) status is confirmed by the IRS record; the founding date and NC incorporation month
+still need confirmation — see §8.2.
 
 ### 1.2 Purpose
 The website serves as the primary digital presence for REPAC, providing information to current and prospective engineering families, facilitating community engagement, and supporting fundraising efforts.
 
 ### 1.3 Target Audiences
 - **Primary:** Parents/guardians of current Riverside engineering students
-- **Secondary:** Prospective families (incoming freshmen and magnet lottery applicants)
+- **Secondary:** Prospective families (incoming freshmen and DPS Magnet and CTE Pathway lottery applicants)
 - **Tertiary:** Community members, corporate sponsors, alumni families
 
 ---
@@ -40,9 +48,12 @@ repac-riverside.org/
 |-- student-activities.html     [Student Activities]
 |-- events.html                 [Events]
 |-- fundraising.html            [Fundraising]
+|-- repac-documents.html        [REPAC Documents — not in nav; linked from Home > Resources]
 |
 |-- css/style.css               [Shared Stylesheet]
 |-- js/main.js                  [Shared JavaScript]
+|-- images/                     [Image assets]
+|-- wix-host/                   [Astro deployment wrapper — see §3.1]
 ```
 
 ### 2.1 Navigation Structure
@@ -55,6 +66,11 @@ repac-riverside.org/
 | Activities | `student-activities.html` | -- |
 | Events | `events.html` | -- |
 | Fundraising | `fundraising.html` | -- |
+| Spirit Wear | Square storefront (external, new tab) | -- |
+
+`repac-documents.html` is intentionally absent from the primary nav; it is reached from the Resources
+list on the home page. Every page must carry the identical nav (see FR-STY-01), including the
+external Spirit Wear item.
 
 ---
 
@@ -66,17 +82,24 @@ repac-riverside.org/
 | Markup | Semantic HTML5 |
 | Styling | Vanilla CSS3 (custom properties / variables) |
 | Scripting | Vanilla JavaScript (IIFE, no dependencies) |
-| Build Tools | None (static site, no build step) |
-| Hosting | Static file hosting (open `index.html` or `python3 -m http.server`) |
+| Build Tools | None for the site itself (static files, no build step) |
+| Local preview | Open `index.html`, or `python3 -m http.server` |
+| Deployment | Wix-Managed Headless via the `wix-host/` Astro wrapper |
+
+The static files at the repo root are the site. `wix-host/` is a thin Astro wrapper that exists only
+because Wix-Managed Headless requires an Astro frontend: a sync script copies the root static files
+into `wix-host/public/`, and an account owner runs preview and release locally (there is no CI that
+talks to Wix). **[`docs/deploy.md`](docs/deploy.md) is the canonical deployment reference** — auth,
+the preview/release flow, and the cutover/rollback runbook live there and are not restated here.
 
 ### 3.2 Design System
 | Token | Value | Usage |
 |---|---|---|
-| `--pirate-black` | `#1a1a2e` | Header, footer, headings, table headers |
+| `--pirate-black` | `#2a1b47` | Header, footer, headings, table headers (a very dark purple, despite the name) |
 | `--pirate-gold` | `#d4a017` | Brand accent, section underlines, buttons (primary) |
 | `--pirate-gold-light` | `#f0d060` | Hover states, hero subtitle |
-| `--pirate-red` | `#8b0000` | Links, card headings, buttons (secondary) |
-| `--pirate-red-light` | `#b22222` | Link hover, button hover |
+| `--pirate-purple` | `#4b2e83` | Links, card headings, buttons (secondary), `.highlight` info boxes |
+| `--pirate-purple-light` | `#6b46a8` | Link hover, button hover |
 | `--font-main` | Segoe UI / system sans-serif | All body text |
 | `--max-width` | `1100px` | Content container |
 | `--nav-height` | `60px` | Sticky header |
@@ -86,10 +109,14 @@ repac-riverside.org/
 - **Dropdown menus** (CSS hover on desktop, JS toggle on mobile)
 - **Hero section** (home page only) with gradient background
 - **Card grid** (`auto-fit`, `minmax(260px, 1fr)`) for quick links and content blocks
-- **Info boxes** (gold left-border default, red left-border `.highlight` variant)
+- **Info boxes** (gold left-border default, purple left-border `.highlight` variant)
 - **FAQ accordion** (JS toggle `.open` class, `+`/`-` indicator)
-- **Responsive tables** with horizontal scroll wrapper
-- **Placeholder blocks** (dashed yellow border, italic) for content pending from leadership
+- **Resource lists** (nested bulleted link lists, used for Home > Resources and REPAC Documents)
+- **Media block** (side-by-side text and image, used for Spirit Wear)
+- **Calendar embed** (responsive iframe pair — month view on desktop, agenda view on mobile — with a
+  loading overlay and spinner)
+- **Responsive table wrapper** (`.table-wrap`, horizontal scroll)
+- **Placeholder blocks** (dashed gold border, italic) for content pending from leadership
 - **3-column footer** with quick links, resources, and copyright
 - **Mobile breakpoint** at `768px` (hamburger menu, stacked cards, stacked nav)
 
@@ -99,7 +126,10 @@ repac-riverside.org/
 | Mobile nav toggle | `.nav-toggle` click toggles `.open` on `.site-nav`, updates `aria-expanded` |
 | Dropdown on touch | Prevents default on mobile dropdown links, toggles `.open` on parent |
 | FAQ accordion | Click `.faq-question` toggles `.open` on `.faq-item` parent |
-| Active nav link | Matches `window.location.pathname` to `href` and adds `.active` class |
+| Active nav link | Matches the last path segment of `window.location.pathname` to `href`, adds `.active` |
+| Calendar loading state | Adds `.loaded` to `.calendar-container` once both iframes load; 10s fallback timeout |
+
+The temporary "UNOFFICIAL DRAFT" banner was removed in August 2026 (#58) ahead of launch.
 
 ---
 
@@ -109,52 +139,53 @@ repac-riverside.org/
 | Section | Content | Status |
 |---|---|---|
 | Hero | Organization name, school/location, tagline ("Supporting PLTW... since 2008") | Complete |
-| Next Meeting banner | 2nd Thursday, 6 PM, RHS Media Center with link to meetings page | Complete |
-| Welcome blurb | REPAC description, 501(c)(3) status, mission summary | Complete |
-| Quick Links grid | 6 cards linking to About, Program, Freshman Info, Activities, Meetings, Fundraising | Complete |
+| Welcome blurb | REPAC description, 501(c)(3) status, mission summary, meeting cadence | Complete |
+| Quick Links grid | 6 cards: About, Engineering Program, Incoming Freshmen, Student Activities, Events, Fundraising | Complete |
+| Resources | Links to the Pathway Handbook, REPAC Documents, meeting minutes, Google Group sign-up, RHS/DPS resources, PLTW | Complete |
 | Mission statement | Fundraising, mentors, competitions, community | Complete |
 
 ### 4.2 About (`about.html`)
 | Section | Content | Status |
 |---|---|---|
-| History | Founded Feb 2008, incorporated 2016, 501(c)(3) status | Complete |
+| History | Founding, incorporation, 501(c)(3) status | Complete — founding date and incorporation month need confirmation (§8.2) |
 | Mission | Bulleted list of REPAC activities | Complete |
-| Organization Details | Table: founded, incorporation, IRS status, membership, meetings | Complete |
-| Executive Board | Board member names and roles | **PLACEHOLDER** |
+| Organization Details | Table: official name, tax ID, address, founded, incorporation, IRS status, membership, meetings | Complete — name, tax ID, address and 501(c)(3) match the IRS record; other rows per §8.2 |
+| Executive Board | Officers and committee chairs for the current academic year, plus a fallback contact for reaching a member | Complete — 2026-2027 roster, no open chairs. Year-stamped: refresh every academic year |
 | Get Involved | Membership info (no dues), CTA to meetings | Complete |
 
 ### 4.3 Engineering Program (`engineering-program.html`)
 | Section | Content | Status |
 |---|---|---|
 | What is PLTW | PLTW description, Riverside's standing in DPS | Complete |
-| Program Structure | Foundation courses (IED, POE, CEA) and capstone (EDD) as cards | Complete |
+| Program Structure | Foundation courses (IED, POE, DE) and specialty courses as cards | Complete |
 | College Credit | PLTW end-of-course assessment credit opportunities | Complete |
-| Admission | Magnet program, DPS lottery process, link to freshman info | Complete |
+| Meet Our Faculty | Faculty cards with name and course taught | Complete — the six names match DPS's 2026 PLTW announcement; course assignments need confirmation |
+| Admission | Magnet program (listed by DPS as a CTE pathway), DPS Magnet and CTE Pathway lottery (January), attendance-zone priority, links to DPS and freshman info | Complete — matches DPS; awaiting the program director's confirmation (§8.2) |
 
 ### 4.4 Course Descriptions (`course-descriptions.html`)
 | Section | Content | Status |
 |---|---|---|
-| IED (9th grade) | Design process, 3D modeling, engineering notebooks | Complete |
-| POE (10th grade) | Mechanisms, energy, statics, materials, kinematics | Complete |
-| CEA (11th grade) | Civil engineering, architecture, Revit software | Complete |
-| EDD (12th grade) | Capstone, team projects, professional presentation | Complete |
-| Additional Courses | Electives (CS, Digital Electronics, etc.) | **PLACEHOLDER** |
+| Foundation: IED (9th) | Design process, Onshape 3D modeling, engineering notebooks | Complete |
+| Foundation: POE (10th) | Mechanisms, strength of structures and materials, automation | Complete |
+| Foundation: DE (11th) | Combinational/sequential logic, circuit design tools | Complete |
+| Specialty courses | AE, CEA, CIM, CSE, CSP, CSA, SEC — each with prerequisites | Complete |
+| Program requirement note | Three foundation courses plus at least one specialty course; satisfies the DPS 4-course concentration | Complete |
 
 ### 4.5 Freshman Info (`freshman-info.html`)
 | Section | Content | Status |
 |---|---|---|
-| Getting Into the Program | DPS magnet lottery process and timeline | Complete |
+| Getting Into the Program | DPS Magnet and CTE Pathway lottery, eligibility, attendance-zone priority | Complete — matches DPS; awaiting the program director's confirmation (§8.2) |
 | What to Expect | IED course, standard academic schedule | Complete |
-| Supplies & Materials | Engineering notebook, basic supplies, REPAC funding help | **PLACEHOLDER** (details pending) |
-| Getting Involved | REPAC meetings, TSA, community service, social events | Complete |
+| Supplies & Materials | School-provided vs. family-provided supply lists | Complete |
+| Getting Involved | REPAC meetings, TSA, social events | Complete |
 | FAQ links | Buttons to both FAQ pages | Complete |
-| Key Contacts | Engineering dept and REPAC leadership contacts | **PLACEHOLDER** |
+| Key Contacts | Engineering faculty by course | Complete — course assignments need confirmation; a REPAC leadership contact is still missing |
 
 ### 4.6 Engineering FAQ (`engineering-faq.html`)
 | Question | Status |
 |---|---|
 | What is PLTW? | Complete |
-| How to get into the program? | Complete |
+| How to get into the program? | Complete — matches DPS; awaiting the program director's confirmation (§8.2) |
 | Prior experience needed? | Complete |
 | What courses? | Complete |
 | College credit? | Complete |
@@ -162,6 +193,12 @@ repac-riverside.org/
 | Only for future engineers? | Complete |
 | Software used? | Complete |
 | Transfer after freshman year? | Complete |
+| Durham Tech / Career and College Promise? | Complete — links Durham Tech's dual enrollment page |
+| What is NTHS? | Complete |
+| NTHS membership criteria at Riverside? | Complete — criteria need confirmation |
+| DPS grading scale? | Complete |
+| Unweighted GPA calculation? | Complete |
+| Weighted GPA calculation? | Complete — which PLTW courses earn +1.0 needs confirmation (§8.2) |
 
 ### 4.7 REPAC FAQ (`repac-faq.html`)
 | Question | Status |
@@ -172,54 +209,60 @@ repac-riverside.org/
 | Tax-exempt status? | Complete |
 | How funds are used? | Complete |
 | How to get involved? | Complete |
-| How to donate? | **PLACEHOLDER** |
-| How to contact REPAC? | **PLACEHOLDER** |
+| How to donate? | Complete — points at the Fundraising page rather than restating the methods |
+| How to contact REPAC? | Complete |
 
 ### 4.8 Student Activities (`student-activities.html`)
 | Section | Content | Status |
 |---|---|---|
 | TSA | Chapter description, competition event types, encouragement to join | Complete |
-| Community Service | Description of service projects | **PLACEHOLDER** (specifics pending) |
-| Social Events | List of past event types, link to events page | Complete |
-| Clubs & Organizations | Robotics, Science Olympiad, etc. | **PLACEHOLDER** |
+| FIRST Robotics | NCSSM's Team 900 (Zebracorns) and a link to its site | Complete — whether it is open to all RHS engineering students needs confirmation |
+| Contest Opportunities | Contests the faculty coordinate or publicize | Complete |
+| Field Trips | Annual engineering trip and freshman trip | Complete |
+| Tallo | Professional networking profile guidance | Complete |
+| Xello | DPS CTE career/college planning tool | Complete |
+| Local Enrichment Programs | List of university, business, and community programs students have attended | Complete |
 
 ### 4.9 Events (`events.html`)
 | Section | Content | Status |
 |---|---|---|
-| Upcoming Events | Cards: monthly meeting, TSA regional, TSA state | Partial (TSA dates TBD) |
-| Annual Events | Table of 7 recurring events with typical timing | Complete |
-| Volunteer Opportunities | Description + sign-up info | **PLACEHOLDER** |
+| Event Calendar | Embedded REPAC Google Calendar, month view on desktop and agenda view on mobile, with loading state | Complete |
+
+### 4.10 REPAC Documents (`repac-documents.html`)
+| Section | Content | Status |
+|---|---|---|
+| About REPAC | Origin, shift in focus after PLTW accreditation, incorporation and 501(c)(3) dates | Complete — September 2016 501(c)(3) matches the IRS record; July 2016 incorporation needs confirmation (§8.2) |
+| Key Documents | Bylaws (PDF), RHS Engineering Pathway Handbook, "What REPAC Does" (PDF) | Complete — two links are hosted on legacy Wix file storage (§9.2) |
+| Related Pages | Cross-links to About, REPAC FAQ, Fundraising | Complete |
+| Contact | REPAC email address | Complete |
 
 ### 4.11 Fundraising (`fundraising.html`)
 | Section | Content | Status |
 |---|---|---|
-| Spirit Wear | Description of merch, ordering process | **PLACEHOLDER** (links/items pending) |
+| Spirit Wear | Description, product photo, link to the Square storefront | Complete |
 | How Funds Are Used | 4 cards: equipment, competitions, supplies, events | Complete |
-| Make a Donation | 501(c)(3) info, donation options | **PLACEHOLDER** |
-| Corporate Matching | Employer matching, sponsorships | **PLACEHOLDER** (tiers/contacts pending) |
-| Other Ways to Help | Bulleted list: volunteer, donate materials, mentor, spread the word | Complete |
+| Make a Donation | 501(c)(3) note, online (Square) and by-check options | Complete — check payee and mailing instructions need confirmation |
+| Corporate Matching & Sponsorship | Employer matching, sponsorship inquiries | Complete |
+| Questions or Comments | REPAC email address | Complete |
 
 ---
 
 ## 5. Placeholder Content Inventory
 
-The following items require input from REPAC leadership before the site is content-complete:
+A placeholder is a `class="placeholder"` block: content the page needs but doesn't have, rendered as
+a visibly distinct dashed box (FR-CON-04) so it can't be mistaken for finished copy. The inventory is
+whatever that class currently matches — regenerate it rather than trusting a list:
 
-| # | Page | Section | What's Needed |
-|---|---|---|---|
-| 1 | `about.html` | Executive Board | Board member names, roles, optional photos |
-| 2 | `course-descriptions.html` | Additional Courses | Elective course list and descriptions |
-| 3 | `freshman-info.html` | Supplies & Materials | Detailed supply list per course |
-| 4 | `freshman-info.html` | Key Contacts | Engineering dept email/phone, REPAC leadership contacts |
-| 5 | `repac-faq.html` | How to donate? | Donation methods, links, payment platforms |
-| 6 | `repac-faq.html` | How to contact? | Email address, social media handles |
-| 7 | `student-activities.html` | Community Service | Specific projects, volunteer hour requirements |
-| 8 | `student-activities.html` | Clubs & Organizations | Current club list and descriptions |
-| 9 | `events.html` | Upcoming Events | Confirmed TSA competition dates |
-| 10 | `events.html` | Volunteer Opportunities | Sign-up links, contact for volunteer coordinator |
-| 11 | `fundraising.html` | Spirit Wear | Product catalog, ordering link, pricing |
-| 12 | `fundraising.html` | Make a Donation | Online payment link, mailing address, EIN/tax ID |
-| 13 | `fundraising.html` | Corporate Sponsorship | Sponsorship tiers, partnership contact |
+```bash
+grep -rn 'class="placeholder"' *.html
+```
+
+**Currently: none.** The last three — the Executive Board roster on `about.html` and the donate and
+contact answers on `repac-faq.html` — were filled in August 2026.
+
+An empty inventory means no section is *visibly* unfinished. It does not mean the content is
+verified: the facts marked *needs confirmation* in §8.2 are still outstanding, and the board roster
+carries an academic-year stamp that goes stale annually.
 
 ---
 
@@ -231,12 +274,15 @@ The following items require input from REPAC leadership before the site is conte
 - **FR-NAV-03:** Current page highlighted with `.active` class in nav
 - **FR-NAV-04:** Hamburger menu toggles mobile nav at breakpoint <= 768px
 - **FR-NAV-05:** `aria-expanded` attribute updates on mobile nav toggle for accessibility
+- **FR-NAV-06:** External nav destinations (Spirit Wear) open in a new tab
 
 ### 6.2 Content Display
 - **FR-CON-01:** FAQ accordion expands/collapses individual items on click
 - **FR-CON-02:** Card grids reflow responsively (`auto-fit`, minimum 260px per card)
-- **FR-CON-03:** Tables scroll horizontally on narrow viewports
-- **FR-CON-04:** Placeholder sections are visually distinct (dashed yellow border, italic text)
+- **FR-CON-03:** Tables scroll horizontally on narrow viewports (via the `.table-wrap` wrapper)
+- **FR-CON-04:** Placeholder sections are visually distinct (dashed gold border, italic text)
+- **FR-CON-05:** The embedded calendar shows a loading state until the iframes load, and switches
+  between month and agenda views at the mobile breakpoint
 
 ### 6.3 Responsiveness
 - **FR-RES-01:** All pages must be usable on viewports from 320px to 1920px+
@@ -254,9 +300,12 @@ The following items require input from REPAC leadership before the site is conte
 ## 7. Non-Functional Requirements
 
 ### 7.1 Performance
-- **NFR-PERF-01:** Zero external dependencies (no frameworks, CDNs, or third-party scripts)
+- **NFR-PERF-01:** No third-party JavaScript or CSS frameworks, CDNs, or analytics in page code. The
+  permitted external dependencies are content embeds and outbound links: the Google Calendar iframe
+  on `events.html`, the Square storefront, and Google Docs/Drive resources.
 - **NFR-PERF-02:** Total page weight should remain under 100KB per page (excluding images)
-- **NFR-PERF-03:** No build step required; site deployable as-is to any static host
+- **NFR-PERF-03:** No build step required to serve the site; the static files are deployable as-is to
+  any static host, and the `wix-host/` wrapper copies rather than transforms them (§3.1)
 
 ### 7.2 Accessibility
 - **NFR-A11Y-01:** Semantic HTML5 elements (`header`, `main`, `footer`, `nav`, `section`)
@@ -272,7 +321,7 @@ The following items require input from REPAC leadership before the site is conte
 
 ### 7.4 Maintainability
 - **NFR-MAINT-01:** Single shared stylesheet and script for all pages
-- **NFR-MAINT-02:** No build tooling, package managers, or transpilation required
+- **NFR-MAINT-02:** No build tooling, package managers, or transpilation required for the site itself
 - **NFR-MAINT-03:** Content updates achievable by editing HTML directly
 - **NFR-MAINT-04:** Placeholder pattern provides clear visual cue for incomplete content
 
@@ -288,53 +337,98 @@ The following items require input from REPAC leadership before the site is conte
 ### 8.1 Brand Identity
 - **School:** Riverside High School, Durham, NC
 - **Mascot Theme:** Pirates (skull-and-crossbones icon in brand mark)
-- **Color Scheme:** Black and gold (pirate theme) with dark red accent
+- **Color Scheme:** Purple and gold (Riverside Pirates), switched from black/gold/red in August 2026 (#73)
 - **Tone:** Welcoming, informative, community-oriented; addresses parents directly
 
 ### 8.2 Key Organizational Facts
-| Fact | Value |
-|---|---|
-| Full Name | Riverside Engineering Parent Action Council |
-| Abbreviation | REPAC |
-| Founded | February 2008 |
-| IRS Status | 501(c)(3) tax-exempt |
-| NC Incorporation | 2016 |
-| Membership | All RHS engineering parents (no dues) |
-| Meeting Schedule | 2nd Thursday of each month, 6:00 PM |
-| Meeting Location | RHS Media Center |
-| Curriculum | Project Lead The Way (PLTW) |
-| Competition Org | Technology Student Association (TSA) |
+This is the one place facts are recorded. **Verified** means checked against the source named on
+2026-11-17. **Needs confirmation** means only REPAC leadership or the engineering program director
+can answer; those rows are tracked in `TODO.md` ("Waiting on REPAC leadership"). Program facts go to
+the program director, Mike Dibble.
+
+| Fact | Value | Source / status |
+|---|---|---|
+| Legal name | Riverside Engineering Parent Action Council Inc | Verified — IRS record |
+| Abbreviation | REPAC | -- |
+| Tax ID (EIN) | 81-3420851 | Verified — IRS record |
+| Address | 3218 Rose of Sharon Rd, Durham NC 27712-3130 (this is Riverside High School's address) | Verified — IRS record, DPS |
+| IRS status | 501(c)(3), donations deductible; ruling date September 2016 | Verified — IRS record |
+| NC incorporation | July 2016 | Needs confirmation (NC Secretary of State) |
+| Founded | February 2008 | Needs confirmation |
+| Membership | All RHS engineering parents, no dues | Needs confirmation |
+| Board elections | Annually in May | Needs confirmation |
+| Meetings | 2nd Thursday of each month, 6:00 PM, RHS Media Center | Needs confirmation |
+| Contact email | REPACrhs@gmail.com | -- |
+| Program type | Magnet program. DPS lists it as a Career and Technical Education (CTE) pathway, and admits through its Magnet and CTE Pathway lottery | "Magnet" is REPAC's usage; the DPS listing is verified (DPS CTE Pathways page). Which label to lead with needs the program director's confirmation |
+| Admission | Only through the DPS Magnet and CTE Pathway lottery, which opens each January; applicants must live in Durham County; students in Riverside's attendance zone get priority seating only if they enter the lottery and rank Riverside Engineering first | Verified — DPS CTE Pathways and lottery pages; program director asked to confirm |
+| In-zone admission odds | The site makes no claim | Needs confirmation before saying anything |
+| Entrance requirements | No entrance exam or GPA requirement | Needs confirmation |
+| PLTW recognition | PLTW Distinguished High School, 9th consecutive year (2026) | Verified — DPS announcement; not yet on the site |
+| Weighted GPA (PLTW) | State policy gives college-level weighting (+1.0) to PLTW courses approved for college credit | Policy verified — SBE GRAD-009; which Riverside PLTW courses qualify needs confirmation |
+| Faculty | Mike Dibble, William Oakley, Ryan Patridge, Andrew (Drew) Byers, Benjamin Drugatz, Emily Quadrio | Names verified — DPS announcement; course assignments need confirmation |
+| Curriculum | Project Lead The Way (PLTW) | -- |
+| Competition org | Technology Student Association (TSA) | -- |
+
+Sources: IRS record via [ProPublica Nonprofit Explorer](https://projects.propublica.org/nonprofits/organizations/813420851);
+[DPS CTE Pathways](https://welcome.dpsnc.net/cte-pathways/); [About Riverside (DPS)](https://www.dpsnc.net/o/riverside/page/about-riverside);
+[SBE policy GRAD-009](https://content.govdelivery.com/attachments/NCSBE/2025/10/03/file_attachments/3409884/GRAD-009%20-%20Grading%20and%20Transcript%20Standards%2010-02-2025.pdf);
+[Riverside news feed (PLTW Distinguished, faculty)](https://www.dpsnc.net/o/riverside/live-feed/?page_no=4).
 
 ### 8.3 PLTW Course Sequence
-| Year | Course | Code |
+Three foundation courses are required, plus **at least one** specialty course — which also satisfies
+the DPS four-course "concentration" requirement. Additional specialty courses may be taken with
+faculty approval as scheduling allows.
+
+**Foundation courses (all required):**
+
+| Typically taken | Course | Code |
 |---|---|---|
 | Freshman (9th) | Introduction to Engineering Design | IED |
 | Sophomore (10th) | Principles of Engineering | POE |
-| Junior (11th) | Civil Engineering & Architecture | CEA |
-| Senior (12th) | Engineering Design & Development (Capstone) | EDD |
+| Junior (11th) | Digital Electronics | DE |
+
+**Specialty courses (at least one required):**
+
+| Course | Code | Prerequisite |
+|---|---|---|
+| Aerospace Engineering | AE | POE |
+| Civil Engineering & Architecture | CEA | POE |
+| Computer Integrated Manufacturing | CIM | POE |
+| Computer Science Essentials | CSE | None |
+| AP Computer Science Principles | CSP | CSE recommended |
+| AP Computer Science A | CSA | CSP |
+| Cybersecurity | SEC | CSE |
+
+Which specialty courses run in a given year is a scheduling matter for the engineering department and
+needs confirmation before the list is presented as a catalog.
 
 ---
 
 ## 9. Identified Gaps & Recommendations
 
 ### 9.1 Missing Content (Requires REPAC Leadership Input)
-All 15 placeholder items cataloged in Section 5 above.
+No placeholder blocks remain (§5). What's still owed is verification rather than drafting: the facts
+marked *needs confirmation* in §8.2, the specialty-course offerings in §8.3, and an annual refresh of
+the year-stamped board roster on `about.html` (currently 2026-2027, no open chairs).
 
 ### 9.2 Missing Technical Features
 | # | Gap | Recommendation |
 |---|---|---|
 | 1 | No `<meta name="description">` tags | Add unique descriptions per page for SEO |
 | 2 | No Open Graph / social sharing metadata | Add `og:title`, `og:description`, `og:image` tags |
-| 3 | No favicon | Add a pirate-themed favicon (`favicon.ico` / `favicon.svg`) |
-| 4 | No sitemap.xml | Generate `sitemap.xml` for search engine indexing |
-| 5 | No robots.txt | Add basic `robots.txt` allowing all crawlers |
-| 6 | No 404 page | Create a custom 404 page with navigation back to home |
-| 7 | No contact form | Consider a simple contact form or mailto link |
+| 3 | No favicon | The live site serves Wix's blank placeholder `favicon.ico`. Add a REPAC favicon |
+| 4 | No sitemap.xml | The live `robots.txt` (auto-generated by Wix) points at `/sitemap.xml`, which returns 404 |
+| 5 | No robots.txt in the repo | Wix serves its own; decide whether to override it |
+| 6 | No 404 page in the static site | The deployed site is covered by `wix-host/src/pages/404.astro`; a static-host 404 is still missing for non-Wix serving |
+| 7 | No contact form | Consider a simple contact form; a `mailto:` link is in place on two pages |
 | 8 | No analytics | Consider privacy-respecting analytics (e.g., Plausible, GoatCounter) |
 | 9 | No print styles | Add `@media print` CSS for clean printing of schedules/FAQs |
 | 10 | No skip-to-content link | Add skip navigation link for screen reader accessibility |
-| 11 | No `images/` directory populated | Add hero images, board photos, spirit wear photos, engineering lab photos |
-| 12 | Header/footer duplicated in every file | Consider a static site generator or HTML includes for DRY templates |
+| 11 | `.table-wrap` defined but unused | Wrap the `about.html` table (and any future tables) to satisfy FR-CON-03 |
+| 12 | Old Wix URLs return 404 | Since cutover, all 15 legacy paths (`/repac`, `/engineering-program`, …) 404. Add redirects to the matching new pages |
+| 13 | Two PDFs still hosted by the legacy site | `repac-documents.html` links two PDFs on legacy Wix file storage (#69). They break if the legacy site is deleted; move them to the REPAC Google Drive |
+| 14 | Header/footer duplicated in every file | Consider a static site generator or HTML includes for DRY templates |
+| 15 | Deploy only copies some files | `wix-host/scripts/sync-static.mjs` copies `*.html`, `css/`, `js/`, `images/` only. Any other root file (robots.txt, sitemap.xml, favicon, `documents/`) is silently left out |
 
 ### 9.3 Content Enhancement Opportunities
 | # | Opportunity | Description |
@@ -342,33 +436,42 @@ All 15 placeholder items cataloged in Section 5 above.
 | 1 | Photo gallery | Showcase engineering labs, student projects, TSA competitions, events |
 | 2 | Testimonials | Student/parent quotes about the engineering program |
 | 3 | Alumni spotlight | Where have graduates gone? College and career outcomes |
-| 4 | Newsletter signup | Email list integration for REPAC communications |
-| 5 | Calendar integration | Embed Google Calendar or iCal feed for events/meetings |
-| 6 | Document repository | Bylaws, financial reports, annual meeting presentations |
-| 7 | Sponsor recognition | Logo wall for corporate sponsors and matching employers |
+| 4 | Newsletter signup | Currently an outbound Google Form link; consider on-site integration |
+| 5 | Sponsor recognition | Logo wall for corporate sponsors and matching employers |
+| 6 | Faculty bios and photos | Expand the faculty cards beyond name and course |
 
 ---
 
 ## 10. File Inventory
 
-| File | Size (approx) | Purpose |
-|---|---|---|
-| `index.html` | 5 KB | Home page with hero, quick links, mission |
-| `about.html` | 4 KB | Organization history, mission, board (placeholder) |
-| `engineering-program.html` | 5 KB | PLTW program overview, course cards, admission |
-| `course-descriptions.html` | 5 KB | Detailed IED, POE, CEA, EDD course descriptions |
-| `freshman-info.html` | 5 KB | Magnet lottery, freshman expectations, getting involved |
-| `engineering-faq.html` | 5 KB | 9 engineering program Q&As |
-| `repac-faq.html` | 5 KB | 8 REPAC organization Q&As (2 placeholder) |
-| `student-activities.html` | 4 KB | TSA, community service, social events, clubs |
-| `events.html` | 5 KB | Upcoming events, annual events table, volunteering |
-| `fundraising.html` | 5 KB | Spirit wear, fund usage, donations, sponsorship |
-| `css/style.css` | 8 KB | Complete design system and responsive styles |
-| `js/main.js` | 1 KB | Nav toggle, dropdown, FAQ accordion, active link |
-| `README.md` | 1 KB | Project documentation |
+| File | Purpose |
+|---|---|
+| `index.html` | Home page with hero, quick links, resources, mission |
+| `about.html` | Organization history, mission, org details, executive board roster |
+| `engineering-program.html` | PLTW program overview, course cards, faculty, admission |
+| `course-descriptions.html` | Foundation and specialty course descriptions |
+| `freshman-info.html` | Admission lottery, freshman expectations, supplies, contacts |
+| `engineering-faq.html` | Engineering program Q&As |
+| `repac-faq.html` | REPAC organization Q&As |
+| `repac-documents.html` | Bylaws, handbook, org documents, contact |
+| `student-activities.html` | TSA, robotics, contests, field trips, enrichment programs |
+| `events.html` | Embedded REPAC Google Calendar |
+| `fundraising.html` | Spirit wear, fund usage, donations, sponsorship |
+| `css/style.css` | Complete design system and responsive styles |
+| `js/main.js` | Nav toggle, dropdown, FAQ accordion, active link, calendar loading state |
+| `images/` | Image assets |
+| `wix-host/` | Astro wrapper for Wix-Managed Headless deployment (§3.1, `docs/deploy.md`) |
+| `README.md` | Start here: what the site is, its live status, how to make a change |
+| `AGENTS.md` | Working rules for AI coding agents (and a useful checklist for people) |
+| `TODO.md` | Backlog, plus the questions waiting on REPAC leadership |
+| `SITE_ANALYSIS.md` | April 2026 audit of the legacy Wix site and IA rationale (historical) |
+| `docs/deploy.md` | Canonical deployment reference |
+| `scripts/check-links.mjs` | Link check run by CI on every PR |
 
-**Total site:** 11 HTML pages, 1 CSS file, 1 JS file, ~62 KB content (no images)
+**Total site:** 11 HTML pages, 1 CSS file, 1 JS file, plus image assets.
 
 ---
 
-*This OpenSpec document reflects the current state of the repac-riverside.org codebase as of 2026-03-09. It is intended to serve as a baseline requirements reference for ongoing development, content completion, and future enhancements.*
+*This OpenSpec document is the requirements spec of record for repac-riverside.org. It describes what
+the site must be, not a point-in-time status report; content marked placeholder or "needs
+confirmation" is outstanding work, not a description of intent.*

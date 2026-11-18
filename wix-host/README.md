@@ -33,8 +33,9 @@ npm run deploy:preview  # wix whoami (fail-fast auth check) -> build -> wix prev
 ```
 
 `deploy:preview` aborts in ~4s if you're not logged in — re-run `npx wix login` and try again.
-When you're ready to publish for real, `npm run deploy:release` (same guard, ends in `wix release`;
-does **not** touch DNS).
+When you're ready to publish for real, `npm run deploy:release` (same guard, ends in `wix release`).
+**Since cutover this updates www.repac-riverside.org immediately**, so release only from a clean,
+up-to-date `main` after checking the preview (`docs/deploy.md` §4).
 
 ## Notes
 
